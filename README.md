@@ -1,5 +1,5 @@
 ```
-╔✨═🪨🪵═🪄🌙═🔮🌟  
+ ╔✨═🪨🪵═🪄🌙═🔮🌟  
  ║ UiTerminalMojo ║  
  ╰══════┼═════─═══╝  
 ```
@@ -51,11 +51,11 @@ now it is fun and learning is easy.
 
 &nbsp;
 
-   
+```
 ┼──────────────╮  ️  
 │The framework ├─═   
 ╰──────────────╯     
-
+```
 
 It is a terminal user interface framework,  
 where everything scales relatively🪗!  
@@ -100,10 +100,11 @@ if ui[-1].click():
 ```
 
 &nbsp;
-
+```
  ╔🪨═🪨🪵═🪨🪵═🪨🪵  
  ║ To get started ║  
  ╚════════════════╝  
+```
 
 ```bash
 git clone https://github.com/rd4com/ui-terminal-mojo
@@ -116,10 +117,12 @@ it should become a mojo community package (ecosystem) at time.
 (to integrate easily into existing projects with: `magic add`)
 
 &nbsp;
-
+```
 ╔══════════╗  
 ║ Features ║  🧰🔨🔧🪚📐  
 ╚══════════╝  
+```
+
 `mouse hover`  
 `mouse click`  
 `bg fg color`  
@@ -130,10 +133,12 @@ it should become a mojo community package (ecosystem) at time.
 `border`  
 
 &nbsp;
-
+```
 ╔═════════╗  
 ║ Widgets ║  🎒  
 ╚═════════╝  
+```
+
 `help user overlay` 🤩🔦  
 `selection group`  
 `value selector`  
@@ -159,20 +164,23 @@ it should become a mojo community package (ecosystem) at time.
 🎨 Some widgets have an theme parameter (example `[theme=Fg.magenta]`).
 
 &nbsp;
-
+```
 ╔════════════╗  
 ║ Animations ║  
 ╚════════════╝  
+```
+
 `spinners`  
 `animate_time`  
 `animate_emojis`  
 `animate_simple_inline`  
 
 &nbsp;
-
+```
 ╔────────╗  
 ║ Border ║  
 ╰════════┘  
+```
 
 `StyleBorderSimple`  
 `StyleBorderCurved`  
