@@ -104,8 +104,8 @@ if ui[-1].click():
  ╚════════════════╝  
 
 ```bash
-git clone rd4com/tui
-cd tui
+git clone https://github.com/rd4com/ui-terminal-mojo
+cd ui-terminal-mojo
 magic shell
 mojo run -I src examples/example_app.mojo
 ```
