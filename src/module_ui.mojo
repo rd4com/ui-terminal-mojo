@@ -1146,6 +1146,31 @@ fn widget_inline_message_box(
     else:
         Text(animation[1]) in ui
 
+fn widget_color_picker[preview_hover:Bool = True](mut ui:UI, mut value: Fg):
+    var values = SIMD[DType.uint8,16](
+        39, 30, 31, 32, 33, 34, 35, 36, 37
+    )
+    var start_measuring = ui.start_measuring()
+    for i in range(9):
+
+        var start_measuring2 = ui.start_measuring()
+        Text(" ") | Fg(values[i]) in ui
+        if ui[-1].click():
+            value.value = values[i]
+        if value.value == values[i]:
+            ui[-1].data.replace_each_when_render = String("█")
+        else:
+            ui[-1].data.replace_each_when_render = String("─")
+        @parameter
+        if preview_hover:
+            if ui[-1].hover():
+                ui.move_cursor_after(start_measuring2^.stop_measuring())
+                start_measuring2 = ui.start_measuring()
+                Text("example") | Fg(values[i]) in ui
+        ui.move_cursor_after(start_measuring2^.stop_measuring())
+    var stop_measuring = start_measuring^.stop_measuring()
+    ui.move_cursor_below(stop_measuring^)
+
 fn animate_emojis[values: List[String]](mut ui: UI):
     constrained[len(values)>=1, "At least one emoji"]()
     var pos = ((monotonic()*len(values)) // (10**(9)))%len(values)
