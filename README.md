@@ -215,6 +215,9 @@ few methods are actually needed to build things.
 `start_border` and `end_border`  
 (to use with measurement api, as borders are measured too!)
 
+[Example: creating widgets](./learn/learn_9_how_to_create_widgets.mojo)
+
+
 ### 🧭 The plan:  
 🤷🪄👷
 (try meet new ideas by building)
@@ -292,10 +295,10 @@ In this folder-directory:
 ├ [🔥 3. Hello Palette](./learn/learn_2_hellopalette.mojo)  
 ├ [🔥 4. Hello Layout](./learn/learn_3_hellolayout.mojo)  
 ├ [🔥 5. Hello widgets](./learn/learn_4_hellowidget.mojo)  
-└ [🔥 6. Hello composition](./learn/learn_5_hellocomposition.mojo)  
-└ [🔥 7. Hello Layout 2](./learn/learn_6_scalable_layouts.mojo)  
-└ [🔥 8. Hello customized border](./learn/learn_7_customize_border.mojo)  
-└ [🔥 9. Hello plot/chart](./learn/learn_8_plot.mojo)  
+├ [🔥 6. Hello composition](./learn/learn_5_hellocomposition.mojo)  
+├ [🔥 7. Hello Layout 2](./learn/learn_6_scalable_layouts.mojo)  
+├ [🔥 8. Hello customized border](./learn/learn_7_customize_border.mojo)  
+└ [🔥 9. Hello plot/chart](./learn/learn_8_plot.mojo)
 
 &nbsp;
 
