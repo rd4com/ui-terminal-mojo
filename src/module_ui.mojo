@@ -1073,8 +1073,8 @@ fn widget_plot(mut ui: UI, values: WidgetPlotSIMDQueue, theme:Fg = Fg.default):
     ui.move_cursor_below(widget_measuring^.stop_measuring())
 
 fn widget_steps[theme:Fg=Fg.green, spacing:Int = 2](
-    mut ui: UI, 
-    steps:List[String], 
+    mut ui: UI,
+    steps:List[String],
     current_step:UInt8
 ):
     """Complete if `current_step>=len(steps)`."""
@@ -1083,7 +1083,7 @@ fn widget_steps[theme:Fg=Fg.green, spacing:Int = 2](
     for s in steps:
         var step_measure = ui.start_measuring()
         Text(String(s[]), " "*spacing) in ui
-        if idx == Int(current_step): 
+        if idx == Int(current_step):
             ui[-1] |= theme
         ui.move_cursor_after(step_measure^.stop_measuring())
         idx+=1
@@ -1093,7 +1093,7 @@ fn widget_steps[theme:Fg=Fg.green, spacing:Int = 2](
     for s in steps:
         var step_measure = ui.start_measuring()
         Text(String("-"*(spacing+len(s[])))) in ui
-        if idx == Int(current_step): 
+        if idx == Int(current_step):
             ui[-1] |= theme
         ui[-1].data.replace_each_when_render = String("─")
         "*" in ui
@@ -1171,6 +1171,25 @@ fn widget_color_picker[preview_hover:Bool = True](mut ui:UI, mut value: Fg):
     var stop_measuring = start_measuring^.stop_measuring()
     ui.move_cursor_below(stop_measuring^)
 
+
+fn widget_progress_bar_thin[theme:Fg=Fg.green, width:Int=20](mut ui:UI, percentage: UInt8):
+    constrained[100 >= width >=1, "100 >= width >= 1"]()
+    var start_measuring = ui.start_measuring()
+    var smallest = Float64(100.0)/Float64(width)
+    for i in range(1,width+1):
+        var start_measuring2 = ui.start_measuring()
+        "-" in ui
+        ui[-1].data.replace_each_when_render = String("─")
+        if (i*smallest)<=Int(percentage):
+            if percentage!=0:
+                ui[-1] |= theme
+        ui.move_cursor_after(start_measuring2^.stop_measuring())
+
+    Text(String(" ", percentage, "%")) | theme in ui
+
+    var stop_measuring = start_measuring^.stop_measuring()
+    ui.move_cursor_below(stop_measuring^)
+
 fn animate_emojis[values: List[String]](mut ui: UI):
     constrained[len(values)>=1, "At least one emoji"]()
     var pos = ((monotonic()*len(values)) // (10**(9)))%len(values)
@@ -1230,7 +1249,7 @@ fn animate_simple_inline(mut ui:UI):
     Text(l[pos]) in ui
 
 fn animate_time[theme:Fg=Fg.default](
-    mut ui: UI, 
+    mut ui: UI,
 ):
     alias values = InlineArray[String,12](
         "🕐", "🕑", "🕒", "🕓", "🕔", "🕕", "🕖", "🕗", "🕘", "🕙", "🕚","🕛"
@@ -1239,7 +1258,7 @@ fn animate_time[theme:Fg=Fg.default](
     ui[-1].data.replace_each_when_render = values[(((ui.time_counter.previous*12)//1000000000))%12]
 
 # fn animate_cursor[theme:Fg=Fg.default](
-#     mut ui: UI, 
+#     mut ui: UI,
 # ):
 #     alias values = InlineArray[String,4](
 #         "░","▒","▓","█",
@@ -1262,7 +1281,7 @@ fn tag[W:Writable](mut ui:UI, bg: Bg, value: W):
 # ║ Icons ║
 # ╚═══════╝
 fn icons_circle[theme:Fg=Fg.default](
-    mut ui: UI, 
+    mut ui: UI,
     thick: Bool = False
 ):
     Text(" ") | theme in ui
@@ -1272,7 +1291,7 @@ fn icons_circle[theme:Fg=Fg.default](
         ui[-1].data.replace_each_when_render = String("🞅")
 
 fn icons_square[theme:Fg=Fg.default](
-    mut ui: UI, 
+    mut ui: UI,
     thick: Bool = False
 ):
     Text(" ") | theme in ui
