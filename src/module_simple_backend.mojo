@@ -185,6 +185,8 @@ struct Fg:
     alias white = Self(37)
     var value: UInt8
     fn __init__(out self): self = Self.default
+    fn to_bg(self)->Bg:
+        return Bg(self.value+10)
 
 @value
 struct Bg:
@@ -199,6 +201,8 @@ struct Bg:
     alias white = Self(47)
     var value: UInt8
     fn __init__(out self): self = Self.default
+    fn to_fg(self)->Fg:
+        return Fg(self.value-10)
 
 
 # @value
