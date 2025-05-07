@@ -103,19 +103,6 @@ struct Zone:
             if e[].x>=current:
                 current = e[].x
         return current
-    fn below(self, owned other: Text):
-        var new_zone = self
-        if self.ui_ptr[].next_position:
-            var p = self.ui_ptr[].next_position.value()
-            self.ui_ptr[].next_position = None
-            new_zone.x = Int(p[0])
-            new_zone.y = Int(p[1])
-            #TODO: one XY
-        else:
-            new_zone.x = self.x
-            new_zone.y += 1 #set new element.x below this one
-        new_zone.data = other
-        self.ui_ptr[].zones.append(new_zone^)
     fn __ior__(mut self, other: Bg):
         self.data.bg = other.value
     fn __ior__(mut self, other: Fg):
@@ -370,6 +357,30 @@ struct StyleBorderDouble:
     alias b_r = String("╝")
 
 
+# ┌────────────────────────────────────────────────────────────────────────────┐
+#      Not api: insertions of elements in the ui
+fn __set_first_element(mut ui: UI, arg: Text):
+    var tmp_zone = Zone()
+    tmp_zone.data = arg
+    tmp_zone.ui_ptr = UnsafePointer(to=ui)
+    tmp_zone.x = Int(ui.scroll[0])
+    tmp_zone.y = Int(ui.scroll[1])
+    ui.zones.append(tmp_zone)
+
+fn __insert_below(arg: Zone, owned other: Text):
+    var new_zone = arg
+    if arg.ui_ptr[].next_position:
+        var p = arg.ui_ptr[].next_position.value()
+        arg.ui_ptr[].next_position = None
+        new_zone.x = Int(p[0])
+        new_zone.y = Int(p[1])
+        #TODO: one XY
+    else:
+        new_zone.x = arg.x
+        new_zone.y += 1 #set new element.x below this one
+    new_zone.data = other
+    arg.ui_ptr[].zones.append(new_zone^)
+# └────────────────────────────────────────────────────────────────────────────┘
 
 
 alias XY = SIMD[DType.int32, 2]
@@ -510,25 +521,13 @@ struct UI:
     fn __contains__(mut self, arg: Text):
         #TODO: ui["Menu2"].hover()
         if len(self.zones):
-            self[-1].below(arg)
+            __insert_below(self[-1], arg)
         else:
-            self._start_with(arg)
+            __set_first_element(self, arg)
     @always_inline
     fn append(mut self, arg: Text):
         # Design talk with Owen, for an additional different way to do things
-        if len(self.zones):
-            self[-1].below(arg)
-        else:
-            self._start_with(arg)
-
-    @always_inline
-    fn _start_with(mut self, arg: Text):
-        var tmp_zone = Zone()
-        tmp_zone.data = arg
-        tmp_zone.ui_ptr = UnsafePointer(to=self)
-        tmp_zone.x = Int(self.scroll[0])
-        tmp_zone.y = Int(self.scroll[1])
-        self.zones.append(tmp_zone)
+        arg in self
 
     fn __getitem__(mut self, pos:Int=-1) ->ref[__origin_of(self.zones)]Zone:
         var current_pos = -1
@@ -764,7 +763,7 @@ struct FrameIterator[O:MutableOrigin]:
 # └────────────────────────────────────────────────────────────────────────────┘
 @always_inline
 fn input_buffer[W:Writable, //, label:W](mut ui:UI,mut buffer: String, mut edit: Bool):
-    ui[-1].below(Text(label, buffer) | Bg.red)
+    Text(label, buffer) | Bg.red in ui
     # toggle edit mode on click
     if ui[-1].click():
         if edit == False:
@@ -802,22 +801,22 @@ fn widget_paginate_list[
     if current_page < 0: current_page = 0
     if (current_page*elements_per_page) >= len(list):
         current_page = 0
-    ui[-1].below(Text(label) | Bg.red)
+    Text(label) | Bg.red in ui
     var total_pages = len(list)//elements_per_page
     total_pages += Int((len(list)%elements_per_page)!=0)
 
     start = current_page*elements_per_page
     for i in range(start, start+elements_per_page):
         if i<len(list):
-            ui[-1].below(Text(repr(list[i])))
+            Text(repr(list[i])) in ui
         else:
-            ui[-1].below(Text(""))
+            Text("") in ui
 
-    ui[-1].below(Text(String(current_page+1,"/",total_pages)))
-    ui[-1].below(Text("Next page"))
+    Text(String(current_page+1,"/",total_pages)) in ui
+    Text("Next page") in ui
     if ui[-1].click():
         current_page += 1
-    ui[-1].below(Text("Prev page"))
+    Text("Prev page") in ui
     if ui[-1].click():
         current_page -= 1
 
@@ -832,13 +831,13 @@ fn widget_collapsible_menu[
 ):
     #label ? Menu
     var current = selected
-    ui[-1].below(Text(label) | Bg.black | Fg.yellow)
+    Text(label) | Bg.black | Fg.yellow in ui
     if ui[-1].click():
         is_opened ^= True
 
     if is_opened:
         for i in range(len(elements)):
-            ui[-1].below(Text(repr(elements[i]))|Bg(40|(Int(selected==i)*2)))
+            Text(repr(elements[i]))|Bg(40|(Int(selected==i)*2)) in ui
             if ui[-1].click():
                 if i<len(elements):
                    selected = i

@@ -204,23 +204,6 @@ struct Bg:
     fn to_fg(self)->Fg:
         return Fg(self.value-10)
 
-
-# @value
-# struct Text:
-#     #TODO: simplify, only TextAndColor with default values
-#     var value: String
-#
-#     fn __init__[*W: Writable](out self, *args: *W):
-#         self.value = String(args)
-#
-#     fn __or__(self, other: Bg) -> TextAndColor:
-#         return TextAndColor(self.value, 0, other.value, None)
-#     fn __or__(self, other: Fg, out ret:TextAndColor):
-#         ret = self
-#         ret.fg = other.value
-#     fn write_to[W:Writer](self, mut writer: W):
-#         writer.write(self.value)
-
 @value
 struct Text:
     var value: String
@@ -233,12 +216,6 @@ struct Text:
         self.bg=Bg.default.value
         self.value = String(" ")
         self.replace_each_when_render = None
-    # @implicit
-    # fn __init__(out self, value: Text):
-    #     self.fg=Fg.default.value
-    #     self.bg=Bg.default.value
-    #     self.value = value.value
-    #     self.replace_each_when_render = None
     @implicit
     fn __init__(out self, value: StringLiteral):
         self.fg=Fg.default.value
