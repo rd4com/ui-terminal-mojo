@@ -334,21 +334,21 @@ trait StyledBorder:
     alias b_l: String
     alias b_r: String
 
-struct StyleBorderSimple:
+struct StyleBorderSimple(StyledBorder):
     alias up_l = String("┌")
     alias up_r = String("┐")
     alias v = String("│")
     alias h = String("─")
     alias b_l = String("└")
     alias b_r = String("┘")
-struct StyleBorderCurved:
+struct StyleBorderCurved(StyledBorder):
     alias up_l = String("╭")
     alias up_r = String("╮")
     alias v = String("│")
     alias h = String("─")
     alias b_l = String("╰")
     alias b_r = String("╯")
-struct StyleBorderDouble:
+struct StyleBorderDouble(StyledBorder):
     alias up_l = String("╔")
     alias up_r = String("╗")
     alias v = String("║")
@@ -790,7 +790,7 @@ fn input_buffer[W:Writable, //, label:W](mut ui:UI,mut buffer: String, mut edit:
 @always_inline
 fn widget_paginate_list[
     W:Writable,
-    T:Representable&CollectionElement,
+    T:Representable&Copyable&Movable,
     //,
     label:W,
     elements_per_page:Int = 4
@@ -822,7 +822,7 @@ fn widget_paginate_list[
 
 @always_inline
 fn widget_collapsible_menu[
-    T:Representable&CollectionElement,
+    T:Representable&Copyable&Movable,
     //,
     label: String= "Menu"
 ](
@@ -882,7 +882,7 @@ fn widget_slider[
     ui.move_cursor_below(widget_measurement^.stop_measuring())
 
 fn widget_value_selector[
-    T:CollectionElement&Representable,
+    T:Copyable&Movable&Representable,
     //,
     label:String, theme:Fg = Fg.yellow
 ](
@@ -917,7 +917,7 @@ fn widget_value_selector[
     ui.move_cursor_below(start_label_v_measuring^.stop_measuring())
 
 fn widget_selection_group[
-    T:CollectionElement&Representable,
+    T:Copyable&Movable&Representable,
     //,
     label:String, theme:Fg = Fg.yellow
 ](mut ui:UI, values:List[T], mut selected: Int):
@@ -1218,7 +1218,7 @@ fn shake[speed:Int=8](mut ui:UI):
 # ╔════════╗
 # ║ Ticker ║
 # ╚════════╝
-fn widget_ticker[R:Representable&CollectionElement,//, speed:Int=9](mut ui: UI, inputs: List[R]):
+fn widget_ticker[R:Representable&Movable&Copyable,//, speed:Int=9](mut ui: UI, inputs: List[R]):
     constrained[speed >= 8, "speed >= 8"]()
     var current_time2 = (monotonic() // (10**9))
     Text(repr(inputs[current_time2%len(inputs)])) | Bg.yellow | Fg.black in ui

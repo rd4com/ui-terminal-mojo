@@ -1,6 +1,6 @@
 from sys.info import simdwidthof
 @value
-struct QueueSIMD[dtype: DType, capacity: Int = simdwidthof[dtype]()]:
+struct QueueSIMD[dtype: DType, capacity: Int = simdwidthof[dtype]()](Sized):
     alias storage_type = SIMD[dtype, capacity]
     var data: Self.storage_type
     # var more_values: List[Byte]
