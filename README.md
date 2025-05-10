@@ -89,7 +89,7 @@ and when "tabbed out", the cursor moves back.
 (back where it was in the ui)  
 
 The help overlay is a feature enabled by default,  
-it's home is at the botton left of the screen,  
+it's home is at the bottom left of the screen,  
 This 🌱 teaches all the ui keys quickly to users.  
 It collapse and expand on cursor hover.
 
