@@ -193,6 +193,11 @@ fn is_pos_in_rectangle(value:XY, rectangle:(XY,XY))->Bool:
     return res
 
 
+
+# ╔══════════╗
+# ║ Border   ║
+# ╚══════════╝
+
 # First implementation for creating bordering,
 # seem to work but quite experimental:
 @explicit_destroy
@@ -733,7 +738,7 @@ struct UI:
         return True
 
 # ╔════════════════════════════════════════════════════════════════════════════╗
-# ║ FrameIterator                                                            ║
+# ║ FrameIterator                                                              ║
 # ╚════════════════════════════════════════════════════════════════════════════╝
 @value
 struct FrameIterator[O:MutableOrigin]:
@@ -894,7 +899,7 @@ fn widget_value_selector[
     var start_label_v_measuring = ui.start_measuring()
     var start_label_measuring = ui.start_measuring()
 
-    Text("<") | Bg(theme.value+10) in ui
+    Text("<") | theme.to_bg() in ui
     if ui[-1].click():
         selected -= 1
         if selected < 0:
@@ -905,7 +910,7 @@ fn widget_value_selector[
     "|" in ui
     ui.move_cursor_after(start_label_measuring^.stop_measuring())
     start_label_measuring = ui.start_measuring()
-    Text(">") | Bg(theme.value+10) in ui
+    Text(">") | theme.to_bg() in ui
     if ui[-1].click():
         selected += 1
         selected = selected%len(values)
@@ -1012,7 +1017,7 @@ fn widget_notification_area[
     theme:Fg = Fg.green,
 ](mut ui: UI, mut storage: List[Notification]):
     if storage:
-        Text("Notifications:") | Bg(theme.value+10) in ui
+        Text("Notifications:") | theme.to_bg() in ui
         tag(ui, Bg.blue, len(storage))
     else:
         return
