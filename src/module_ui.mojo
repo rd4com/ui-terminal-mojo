@@ -1,4 +1,4 @@
-from module_simple_backend import *
+from .module_simple_backend import *
 from time import sleep, monotonic
 
 #TODO: replace all with new XY struct

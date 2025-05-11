@@ -1,4 +1,4 @@
-from module_ui import *
+from `ui-terminal-mojo` import *
 from collections import Dict
 
 @value
@@ -87,7 +87,7 @@ fn main():
             " " in ui
 
             var group_measurement = ui.start_measuring()
-            var tmp_measurement = ui.start_measuring() 
+            var tmp_measurement = ui.start_measuring()
             # show start
             Text(s[].start) in ui
             ljust[8](ui)
@@ -103,4 +103,3 @@ fn main():
             ui.move_cursor_below(group_measurement^.stop_measuring())
 
             " " in ui
-

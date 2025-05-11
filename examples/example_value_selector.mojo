@@ -1,5 +1,4 @@
-
-from module_ui import *
+from `ui-terminal-mojo` import *
 
 def main():
     var ui = UI()
@@ -9,7 +8,7 @@ def main():
     for _ in ui:
         widget_value_selector["Selection:", theme=Fg.magenta](ui, selected, values)
         widget_value_selector["DType:", theme=Fg.green](
-            ui, 
-            selected_dtype, 
+            ui,
+            selected_dtype,
             List[DType](DType.uint8, DType.float16)
         )

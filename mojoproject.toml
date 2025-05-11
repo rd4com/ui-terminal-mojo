@@ -2,10 +2,13 @@
 authors = ["rd4com <144297616+rd4com@users.noreply.github.com>"]
 channels = ["https://conda.modular.com/max-nightly", "https://conda.modular.com/max", "https://repo.prefix.dev/modular-community", "conda-forge"]
 name = "MojoTerminalUi"
-platforms = ["linux-64"]
+platforms = ["osx-arm64", "linux-aarch64", "linux-64"]
 version = "0.1.0"
+license = "MIT"
+license-file = "LICENSE"
 
 [tasks]
+build_pkg = { cmd = ["mojo", "package", ".", "-o", "build/ui-terminal-mojo.mojopkg"] }
 
 [dependencies]
 max = ">=25.4.0.dev2025050705,<=25.4.0.dev2025050705"

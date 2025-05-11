@@ -1,4 +1,4 @@
-from module_ui import *
+from `ui-terminal-mojo` import *
 
 def main():
     var ui = UI()
@@ -17,7 +17,7 @@ fn my_custom_widget(mut ui:UI, mut numbers: List[UInt8]):
     if len(numbers):
         #▶️ 📐start measuring our widget space:
         var start_measuring = ui.start_measuring()
-        
+
         #start border (and include it in measurement)
         var border = start_border(ui)
         for n in numbers:
@@ -25,9 +25,9 @@ fn my_custom_widget(mut ui:UI, mut numbers: List[UInt8]):
             widget_slider["Value:"](ui, n[])
         #stop border (and include it in measurement)
         border^.end_border_simple(ui, Fg.magenta)
-        
+
         #⏹️ 📐stop measuring our widget space:
         var stop_measuring = start_measuring^.stop_measuring()
-        
+
         #move the cursor below that space:
         ui.move_cursor_below(stop_measuring^)

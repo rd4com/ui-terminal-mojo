@@ -1,4 +1,4 @@
-from module_ui import *
+from `ui-terminal-mojo` import *
 
 def main():
     var ui = UI()
@@ -10,7 +10,7 @@ def main():
         if ui[-1].click():
             counter+=1
         var measurement = start_measurement^.stop_measuring()
-        
+
         ui.move_cursor_after(measurement^)
         "<- it is a counter" in ui
         "<- it is a button" in ui

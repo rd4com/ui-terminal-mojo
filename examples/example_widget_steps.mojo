@@ -1,5 +1,4 @@
-from module_ui import *
-
+from `ui-terminal-mojo` import *
 
 def main():
     var ui = UI()
@@ -15,4 +14,3 @@ def main():
         "Increment step" in ui
         if ui[-1].click():
             current_step = (current_step+1)#%len(steps)
-

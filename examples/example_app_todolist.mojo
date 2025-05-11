@@ -1,4 +1,4 @@
-from module_ui import *
+from `ui-terminal-mojo` import *
 
 # ╔════════════════════════════════════════════════════════════════════════════╗
 # ║ Features                                                                   ║
@@ -53,4 +53,3 @@ fn main():
         Text("Add Todo") | Bg.green in ui
         if ui[-1].click():
             todos.append(input_todo)
-

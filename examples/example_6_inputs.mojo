@@ -1,4 +1,4 @@
-from module_ui import *
+from `ui-terminal-mojo` import *
 
 # ╔════════════════════════════════════════════════════════════════════════════╗
 # ║ Features                                                                   ║

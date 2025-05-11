@@ -100,6 +100,7 @@ if ui[-1].click():
 ```
 
 &nbsp;
+
 ```
  ╔🪨═🪨🪵═🪨🪵═🪨🪵  
  ║ To get started ║  
@@ -110,11 +111,26 @@ if ui[-1].click():
 git clone https://github.com/rd4com/ui-terminal-mojo
 cd ui-terminal-mojo
 magic shell
-mojo run -I src examples/example_app.mojo
+magic run build_pkg
+mojo run -I build examples/example_app.mojo
 ```
 Stay tuned, this is only the first development phase,  
 it should become a mojo community package (ecosystem) at time.  
 (to integrate easily into existing projects with: `magic add`)
+
+There is an `__init__.mojo`,  
+so that in the meanwhile, in your new projects,  
+it is possible to git clone this repo and just do:  
+
+```python
+from `ui-terminal-mojo` import *
+```
+
+Please stay away from submodules,  
+and wait for the `magic add` solution,  
+because `magic` does the compatibility versions checks of dependencies.  
+(example: adding this to a project that uses an unsupported version mojo)  
+And so things composes with it.
 
 &nbsp;
 ```

@@ -1,5 +1,4 @@
-
-from module_ui import *
+from `ui-terminal-mojo` import *
 from time import perf_counter_ns
 
 def main():

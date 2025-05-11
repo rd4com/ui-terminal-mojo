@@ -1,4 +1,4 @@
-from module_ui import *
+from `ui-terminal-mojo` import *
 
 fn main():
 
@@ -9,14 +9,14 @@ fn main():
     for _ in ui:
         widget_ticker(ui, inputs)
         tooltip(ui,"tooltip !")
-        
+
         "Hello world !" in ui
         tooltip[bg=Bg.cyan](ui,"tooltip2 !")
-        
+
         " " in ui
         Text("Hello world 2!") | Bg(0) | Fg.blue in ui
         blink(ui)
-        
+
         " " in ui
         Text("Hello World !") in ui
         if ui[-1].hover():
@@ -28,4 +28,3 @@ fn main():
         ljust[16](ui)
         Text("!") | Bg.yellow in ui
         rjust[16](ui)
-        

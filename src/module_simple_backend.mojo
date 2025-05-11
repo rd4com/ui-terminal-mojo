@@ -6,7 +6,7 @@ from sys import os_is_macos
 from sys import sizeof
 from memory import UnsafePointer
 from utils import StaticTuple
-from simdqueue import *
+from .simdqueue import *
 
 @value
 struct term_type:

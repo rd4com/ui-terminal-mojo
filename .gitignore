@@ -4,5 +4,5 @@
 # magic environments
 .magic
 magic.lock
-# work in progress
-api_design.md
+# the build pkg
+build/*.mojopkg

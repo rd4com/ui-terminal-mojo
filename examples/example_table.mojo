@@ -1,5 +1,4 @@
-
-from module_ui import *
+from `ui-terminal-mojo` import *
 from time import perf_counter_ns
 
 def main():
@@ -40,4 +39,3 @@ def main():
         for i in range(value):
             Text(i) in ui
         all_border_measuring^.end_border[style="*"](ui,Fg.magenta)
-

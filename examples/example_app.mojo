@@ -1,10 +1,10 @@
-from module_ui import *
+from `ui-terminal-mojo` import *
 
 def main():
 
     var ui = UI()
     ui.feature_tab_menu = True
-    
+
     var current_page:String = "Home"
     var news = List[String]("First page created", "Commit some PR")
 

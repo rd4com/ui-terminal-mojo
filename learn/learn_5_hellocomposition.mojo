@@ -1,4 +1,4 @@
-from module_ui import *
+from `ui-terminal-mojo` import *
 
 @value
 struct User:
@@ -42,7 +42,7 @@ def main():
         user_adder.render(current_list[])
 
 fn show_users(mut ui: UI, users: List[User]):
-    "Function to show users."   
+    "Function to show users."
 
     for u in users:
         Text(u[].name) in ui

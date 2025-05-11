@@ -1,4 +1,4 @@
-from module_ui import *
+from `ui-terminal-mojo` import *
 
 def main():
     var ui = UI()
@@ -17,10 +17,9 @@ def main():
         for u in users:
             Text(u[][0]) in ui
             tooltip(ui, String("city: ", u[][1]))
-        
+
         input_buffer["Name:"](ui, input_name, input_name_is_edited)
         input_buffer["City:"](ui, input_city, input_city_is_edited)
         Text("Add person") | Bg.magenta in ui
         if ui[-1].click():
             users.append((input_name, input_city))
-        
