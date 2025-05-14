@@ -10,18 +10,26 @@ from .simdqueue import *
 
 @value
 struct term_type:
+    alias _generic_type = SIMD[
+        (DType.uint32, DType.uint64)[
+            Int(os_is_macos())
+        ],
+        1
+    ]
     alias NCCS = 20 if os_is_macos() else 32
-    var input: c_uint
-    var output: c_uint
-    var ctrl_f: c_uint
-    var local_f: c_uint
+    
+    var input: Self._generic_type
+    var output: Self._generic_type
+    var ctrl_f: Self._generic_type
+    var local_f: Self._generic_type
     var c_l: StaticTuple[c_char, Int(not os_is_macos())]
     var specials: StaticTuple[UInt8, Self.NCCS]
-    var speed_a: c_uint
-    var speed_b: c_uint
+    var speed_a: Self._generic_type
+    var speed_b: Self._generic_type
 
-    alias ECHO:c_uint = 8
-    alias ICANNON:c_uint = 256 if os_is_macos() else 2
+    alias ECHO:Self._generic_type = 8
+    alias ICANNON:Self._generic_type = 256 if os_is_macos() else 2
+    
     alias VTIME:Int = 5 if not os_is_macos() else 17
     alias VMIN:Int = 6 if not os_is_macos() else 16
 
