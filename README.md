@@ -218,6 +218,7 @@ few methods are actually needed to build things.
 `..do nested things..`
 `some_measurement.peek_dimension()`  
 `some_measurement^.stop_measuring()`  
+`some_completed_measurement.get_dimension()`  
 
 `ui.move_cursor_after(some_completed_measurement^)`  
 `ui.move_cursor_below(some_completed_measurement^)`  

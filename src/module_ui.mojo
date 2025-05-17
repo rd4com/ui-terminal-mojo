@@ -137,25 +137,9 @@ struct StartedMeasurment[O:ImmutableOrigin]:
         ret = CompletedMeasurment(self^)
     fn peek_dimensions(self)->XY:
         """[width,height]."""
-        var smallest_x = Int32.MAX
-        var largest_x = Int32.MIN
-        var smallest_y = Int32.MAX
-        var largest_y = Int32.MIN
-        var ptr = Pointer(to=self.ui_ptr[].zones)
-        if self.start_len == len(ptr[]):
-            return XY(0,0)
-        for i in range(self.start_len,len(ptr[])):
-            if ptr[][i].x < Int(smallest_x):
-                smallest_x = ptr[][i].x
-            if ptr[][i].y < Int(smallest_y):
-                smallest_y = ptr[][i].y
-            if ptr[][i].y > Int(largest_y):
-                largest_y = ptr[][i].y
-            if (ptr[][i].x+len(ptr[][i].data.value)) > Int(largest_x):
-                largest_x = (ptr[][i].x+len(ptr[][i].data.value))
-        # var modif_y = Int32(len(ptr[])!=self.start_len)
-        # var x = Int32(True)
-        return XY(largest_x-smallest_x,largest_y-smallest_y+1)
+        return __calculate_width_heigh_from_to(
+            self.ui_ptr[], self.start_len, len(self.ui_ptr[].zones)
+        )
 
 
 @explicit_destroy()
@@ -167,30 +151,20 @@ struct CompletedMeasurment:
         self.start_len = arg.start_len
         self.stop_len = len(arg.ui_ptr[].zones)
         __disable_del(arg)
-    fn get_rectangle(self, ui:UI)->(XY,XY):
-        var smallest = XY(Int32.MAX,Int32.MAX)
-        var largest = XY(Int32.MIN,Int32.MIN)
-        for i in range(self.start_len,self.stop_len):
-            var x_and_width = ui.zones[i].x+len(ui.zones[i].data.value)-1
-            if ui.zones[i].y > Int(largest[1]):
-                largest[1] = ui.zones[i].y
-            if ui.zones[i].y < Int(smallest[1]):
-                smallest[1] = ui.zones[i].y
-            if ui.zones[i].x < Int(smallest[0]):
-                smallest[0] = ui.zones[i].x
-            if x_and_width > Int(largest[0]):
-                largest[0] = x_and_width
-        return (smallest,largest)
+    fn get_dimensions(self, ui: UI)->XY:
+        """[width,height]."""
+        return __calculate_width_heigh_from_to(
+            ui, self.start_len, self.stop_len
+        )
 
-
-#TODO: create utilities like self.get_width_height:
-fn is_pos_in_rectangle(value:XY, rectangle:(XY,XY))->Bool:
-    var res = True
-    if value[1]<rectangle[0][1]: res = False
-    if value[1]>rectangle[1][1]: res = False
-    if value[0]<rectangle[0][0]: res = False
-    if value[0]>rectangle[1][0]: res = False
-    return res
+# #TODO: create utilities like self.get_width_height:
+# fn is_pos_in_rectangle(value:XY, rectangle:(XY,XY))->Bool:
+#     var res = True
+#     if value[1]<rectangle[0][1]: res = False
+#     if value[1]>rectangle[1][1]: res = False
+#     if value[0]<rectangle[0][0]: res = False
+#     if value[0]>rectangle[1][0]: res = False
+#     return res
 
 
 
@@ -253,11 +227,9 @@ struct Border:
     ](owned self, mut ui:UI, fg: Fg):
         # Very workaround, but need to make progress
         # var last_index = len(ui.zones)
-        var tmp_measuring = ui.start_measuring()
-        tmp_measuring.start_len = self.first_border_index
-        var tmp_size = tmp_measuring.peek_dimensions()
-        var stop_measuring = tmp_measuring^.stop_measuring()
-        __disable_del stop_measuring
+        var tmp_size = __calculate_width_heigh_from_to(
+                ui, self.first_border_index, len(ui.zones)
+                )
 
         var last_border_x = Int(tmp_size[0]+1)
         ui.zones[self.first_border_index].data.value = "-"# * last_border_x
@@ -385,6 +357,28 @@ fn __insert_below(arg: Zone, owned other: Text):
         new_zone.y += 1 #set new element.x below this one
     new_zone.data = other
     arg.ui_ptr[].zones.append(new_zone^)
+fn __calculate_width_heigh_from_to(
+    ui: UI, start_len: Int, stop_len: Int
+) -> XY:
+    var smallest_x = Int32.MAX
+    var largest_x = Int32.MIN
+    var smallest_y = Int32.MAX
+    var largest_y = Int32.MIN
+    if start_len == stop_len:
+        return XY(0,0)
+    var ptr = Pointer(to=ui.zones)
+    for i in range(start_len,stop_len):
+        if ptr[][i].x < Int(smallest_x):
+            smallest_x = ptr[][i].x
+        if ptr[][i].y < Int(smallest_y):
+            smallest_y = ptr[][i].y
+        if ptr[][i].y > Int(largest_y):
+            largest_y = ptr[][i].y
+        if (ptr[][i].x+len(ptr[][i].data.value)) > Int(largest_x):
+            largest_x = (ptr[][i].x+len(ptr[][i].data.value))
+    # var modif_y = Int32(len(ptr[])!=self.start_len)
+    # var x = Int32(True)
+    return XY(largest_x-smallest_x,largest_y-smallest_y+1)
 # └────────────────────────────────────────────────────────────────────────────┘
 
 
