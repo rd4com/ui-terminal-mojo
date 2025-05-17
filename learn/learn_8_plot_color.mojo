@@ -14,5 +14,5 @@ def main():
         var avg = values.average_3bit()
         widget_plot(ui, values, Fg.red if avg>=4 else Fg.green)
         Text(avg) | Fg.green in ui
-        b^.end_border_simple(ui, Fg.red if avg>=4 else Fg.green)
+        b^.end_border(ui, Fg.red if avg>=4 else Fg.green)
         ui.move_cursor_below(m^.stop_measuring())

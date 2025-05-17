@@ -17,7 +17,7 @@ def main():
         var header_border = start_border(ui)
         "header" in ui
         widget_slider["Content center"](ui, content_center)
-        header_border^.end_border_simple[StyleBorderCurved](ui, Fg.blue)
+        header_border^.end_border[StyleBorderCurved](ui, Fg.blue)
         ui.move_cursor_below(top_center_bottom^.stop_measuring())
 
         top_center_bottom =ui.start_measuring()
@@ -26,7 +26,7 @@ def main():
         "menu" in ui
         for i in range(Int(content_menu_l)):
             Text("#"*i) in ui
-        menu_border^.end_border_simple[StyleBorderDouble](ui, Fg.yellow)
+        menu_border^.end_border[StyleBorderDouble](ui, Fg.yellow)
 
         ui.move_cursor_after(center^.stop_measuring())
         center = ui.start_measuring()
@@ -40,7 +40,7 @@ def main():
         for i in range(Int(content_menu_r)):
             Text("#"*i) in ui
             tooltip(ui, String("^size:",i))
-        menu_border^.end_border_simple[StyleBorderDouble](ui, Fg.yellow)
+        menu_border^.end_border[StyleBorderDouble](ui, Fg.yellow)
         ui.move_cursor_below(top_center_bottom^.stop_measuring())
 
         var footer_border = start_border(ui)
@@ -48,7 +48,7 @@ def main():
         widget_slider["Content menu l"](ui, content_menu_l)
         widget_slider["Content menu r"](ui, content_menu_r)
         input_buffer["Center:"](ui, center_h1, center_h1_edit)
-        footer_border^.end_border_simple[StyleBorderSimple](ui, Fg.green)
+        footer_border^.end_border[StyleBorderSimple](ui, Fg.green)
 
         ui.move_cursor_below(all_screen^.stop_measuring())
-        all_screen_border^.end_border_simple[StyleBorderDouble](ui, Fg.cyan)
+        all_screen_border^.end_border[StyleBorderDouble](ui, Fg.cyan)

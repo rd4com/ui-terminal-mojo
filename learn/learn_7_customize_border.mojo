@@ -20,10 +20,10 @@ def main():
         var all_b = start_border(ui)
         "Hello!" in ui
         widget_slider["Slide",Fg.blue,True](ui, value)
-        all_b^.end_border_simple[StyleCustom](ui, Fg.cyan)
+        all_b^.end_border[StyleCustom](ui, Fg.cyan)
         ui.move_cursor_after(small_panel^.stop_measuring())
         all_b = start_border(ui)
         for i in range(value):
             Text(i) in ui
-        all_b^.end_border_simple[StyleBorderCurved](ui, Fg.magenta)
+        all_b^.end_border[StyleBorderCurved](ui, Fg.magenta)
         ui.move_cursor_below(all_screen^.stop_measuring())

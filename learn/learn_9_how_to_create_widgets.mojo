@@ -24,7 +24,7 @@ fn my_custom_widget(mut ui:UI, mut numbers: List[UInt8]):
             #compose with another widget
             widget_slider["Value:"](ui, n[])
         #stop border (and include it in measurement)
-        border^.end_border_simple(ui, Fg.magenta)
+        border^.end_border(ui, Fg.magenta)
 
         #⏹️ 📐stop measuring our widget space:
         var stop_measuring = start_measuring^.stop_measuring()

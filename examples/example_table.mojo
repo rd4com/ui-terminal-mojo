@@ -29,13 +29,13 @@ def main():
         widget_notification_area(ui,notifs)
         if notifs:
             if len(notifs)>=4:
-                b^.end_border[animate=4](ui, Fg.cyan)
+                b^.end_border(ui, Fg.cyan)
             else:
-                b^.end_border[animate=1](ui, Fg.green)
+                b^.end_border[StyleBorderCurved](ui, Fg.green)
         else:
             b^.end_border(ui, Fg.green)
         ui.move_cursor_after(start_measuring^.stop_measuring())
 
         for i in range(value):
             Text(i) in ui
-        all_border_measuring^.end_border[style="*"](ui,Fg.magenta)
+        all_border_measuring^.end_border[StyleBorderDouble](ui,Fg.magenta)

@@ -181,48 +181,8 @@ struct Border:
         Text(".") in ui
         self.first_border_index = len(ui.zones)-1
         ui.next_position = XY(ui[-1].x+1, ui[-1].y+1)
-    fn end_border[style:String=".",animate:Optional[Int]=None](owned self, mut ui:UI, fg: Fg):
-        # var last_index = len(ui.zones)
-        var tmp_measuring = ui.start_measuring()
-        tmp_measuring.start_len = self.first_border_index
-        var tmp_size = tmp_measuring.peek_dimensions()
-        var stop_measuring = tmp_measuring^.stop_measuring()
-        __disable_del stop_measuring
 
-        var last_border_x = Int(tmp_size[0]+1)
-        ui.zones[self.first_border_index].data.value = style * last_border_x
-        ui.zones[self.first_border_index] |= fg
-
-        var tmp_next_pos = ui.next_position
-        if not tmp_next_pos:
-            tmp_next_pos = XY(ui[-1].x, ui[-1].y+2)
-
-        for i in range(tmp_size[1]-1):
-            @parameter
-            if animate:
-                spinner[animate.value()](ui)
-                ui[-1]|=fg
-            else:
-                Text(style) | fg in ui
-            ui[-1].x = ui.zones[self.first_border_index].x
-            ui[-1].y = ui.zones[self.first_border_index].y+Int(i+1)
-            @parameter
-            if animate:
-                spinner[animate.value()](ui)
-                ui[-1]|=fg
-            else:
-                Text(style) | fg in ui
-            ui[-1].x = ui.zones[self.first_border_index].x + Int(tmp_size[0])
-            ui[-1].y = ui.zones[self.first_border_index].y+Int(i+1)
-
-        Text(style * last_border_x) | fg in ui
-        ui[-1].x = ui.zones[self.first_border_index].x
-
-        ui.next_position = tmp_next_pos
-
-        __disable_del(self)
-
-    fn end_border_simple[
+    fn end_border[
         style_border:StyledBorder = StyleBorderSimple
     ](owned self, mut ui:UI, fg: Fg):
         # Very workaround, but need to make progress
@@ -292,6 +252,46 @@ struct Border:
 
         __disable_del(self)
 
+    # fn end_border[style:String=".",animate:Optional[Int]=None](owned self, mut ui:UI, fg: Fg):
+    #     # var last_index = len(ui.zones)
+    #     var tmp_measuring = ui.start_measuring()
+    #     tmp_measuring.start_len = self.first_border_index
+    #     var tmp_size = tmp_measuring.peek_dimensions()
+    #     var stop_measuring = tmp_measuring^.stop_measuring()
+    #     __disable_del stop_measuring
+    #
+    #     var last_border_x = Int(tmp_size[0]+1)
+    #     ui.zones[self.first_border_index].data.value = style * last_border_x
+    #     ui.zones[self.first_border_index] |= fg
+    #
+    #     var tmp_next_pos = ui.next_position
+    #     if not tmp_next_pos:
+    #         tmp_next_pos = XY(ui[-1].x, ui[-1].y+2)
+    #
+    #     for i in range(tmp_size[1]-1):
+    #         @parameter
+    #         if animate:
+    #             spinner[animate.value()](ui)
+    #             ui[-1]|=fg
+    #         else:
+    #             Text(style) | fg in ui
+    #         ui[-1].x = ui.zones[self.first_border_index].x
+    #         ui[-1].y = ui.zones[self.first_border_index].y+Int(i+1)
+    #         @parameter
+    #         if animate:
+    #             spinner[animate.value()](ui)
+    #             ui[-1]|=fg
+    #         else:
+    #             Text(style) | fg in ui
+    #         ui[-1].x = ui.zones[self.first_border_index].x + Int(tmp_size[0])
+    #         ui[-1].y = ui.zones[self.first_border_index].y+Int(i+1)
+    #
+    #     Text(style * last_border_x) | fg in ui
+    #     ui[-1].x = ui.zones[self.first_border_index].x
+    #
+    #     ui.next_position = tmp_next_pos
+    #
+    #     __disable_del(self)
 
 fn start_border(mut ui:UI)->Border:
     # x = ui.start_measuring
@@ -963,9 +963,12 @@ fn widget_percent_bar[theme: Fg=Fg.green](mut ui: UI, value:Int):
     ui.move_cursor_below(widget_measuring^.stop_measuring())
 
 fn widget_percent_bar_with_speed[theme: Fg=Fg.green](mut ui: UI, value:Int, speed_up_to_two: Int):
-    """
+    """Percent bar: `[#####/.....]`.
+    
     Args:
-        speed_up_to_two: The speed ( 0 <= speed <= 2)
+        ui: The ui value.
+        value: `0` to `100` (percentage value).
+        speed_up_to_two: The speed ( 0 <= speed <= 2).
     """
     var normalized_speed = (speed_up_to_two%3)
     if speed_up_to_two > 2: normalized_speed = 2
