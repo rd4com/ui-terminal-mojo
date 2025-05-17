@@ -10,10 +10,11 @@ def main():
     for _ in ui:
         "Hello app" in ui
 
-        var all_border_measuring = start_border(ui)
+        var all_measuring = ui.start_measuring()
+        var all_border_measuring = all_measuring.start_border()
 
         var start_measuring = ui.start_measuring()
-        var b = start_border(ui)
+        var b = start_measuring.start_border()
         widget_slider["Slide", preview_value=True](ui,value)
         input_buffer["Edit new:"](ui, current_value, is_edit)
         "Add" in ui
@@ -23,7 +24,7 @@ def main():
         ui.move_cursor_after(start_measuring^.stop_measuring())
 
         start_measuring = ui.start_measuring()
-        b = start_border(ui)
+        b = start_measuring.start_border()
         "Hello world" in ui
         if notifs: spinner2(ui)
         widget_notification_area(ui,notifs)
@@ -38,4 +39,6 @@ def main():
 
         for i in range(value):
             Text(i) in ui
+        
         all_border_measuring^.end_border[StyleBorderDouble](ui,Fg.magenta)
+        ui.move_cursor_below(all_measuring^.stop_measuring())

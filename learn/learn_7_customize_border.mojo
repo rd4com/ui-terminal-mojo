@@ -13,17 +13,22 @@ def main():
     var value = UInt8(0)
     for _ in ui:
         var all_screen = ui.start_measuring()
-        var small_panel = ui.start_measuring()
+
 
         widget_percent_bar(ui, Int((100.0/15.0)*Int(value)))
 
-        var all_b = start_border(ui)
+        var small_panel = ui.start_measuring()
+        var small_panel_border = small_panel.start_border()
         "Hello!" in ui
         widget_slider["Slide",Fg.blue,True](ui, value)
-        all_b^.end_border[StyleCustom](ui, Fg.cyan)
+        small_panel_border^.end_border[StyleCustom](ui, Fg.cyan)
         ui.move_cursor_after(small_panel^.stop_measuring())
-        all_b = start_border(ui)
+        
+        var small_panel2 = ui.start_measuring()
+        var small_panel_border2 = small_panel2.start_border()
         for i in range(value):
             Text(i) in ui
-        all_b^.end_border[StyleBorderCurved](ui, Fg.magenta)
+        small_panel_border2^.end_border[StyleBorderCurved](ui, Fg.magenta)
+        ui.move_cursor_below(small_panel2^.stop_measuring())
+
         ui.move_cursor_below(all_screen^.stop_measuring())

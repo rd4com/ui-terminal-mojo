@@ -126,7 +126,7 @@ struct Zone:
 #      so that the function does the .stop_measuring() :thumbsup
 
 @explicit_destroy()
-struct StartedMeasurment[O:ImmutableOrigin]:
+struct StartedMeasurment[O:MutableOrigin]:
     var start_len: Int
     # the len of ui.zones when started measuring
     var ui_ptr: Pointer[UI, O]
@@ -140,6 +140,8 @@ struct StartedMeasurment[O:ImmutableOrigin]:
         return __calculate_width_heigh_from_to(
             self.ui_ptr[], self.start_len, len(self.ui_ptr[].zones)
         )
+    fn start_border(mut self) -> Border:
+        return Border(self.ui_ptr[])
 
 
 @explicit_destroy()
@@ -177,6 +179,8 @@ struct CompletedMeasurment:
 @explicit_destroy
 struct Border:
     var first_border_index: Int
+    #TODO: var ptr: Pointer[StartedMeasurment, Origin]
+    # (So that still measuring when end_border is done)
     fn __init__(out self, mut ui: UI):
         Text(".") in ui
         self.first_border_index = len(ui.zones)-1
@@ -292,13 +296,6 @@ struct Border:
     #     ui.next_position = tmp_next_pos
     #
     #     __disable_del(self)
-
-fn start_border(mut ui:UI)->Border:
-    # x = ui.start_measuring
-    # b = ui.start_border()      # ui.next_pos[x,y]+= 1   #struct has start_len
-    # b^.end_border(fg.Blue)     " "*largest_x(len_zone)+1 in ui
-    # ui.move_below(x.stop_measuring()^)
-    return Border(ui)
 
 # Styles, need be more customizable
 # (dynamically for animations)
@@ -469,7 +466,7 @@ struct UI:
     fn __iter__(mut self)->FrameIterator[__origin_of(self)]:
         return FrameIterator(self)
 
-    fn start_measuring(self) -> StartedMeasurment[__origin_of(self)]:
+    fn start_measuring(mut self) -> StartedMeasurment[__origin_of(self)]:
         return StartedMeasurment(self)
 
     fn move_cursor_after(

@@ -10,7 +10,7 @@ def main():
             values.append_3bit_value(ui.time_counter.previous%8)
 
         var m = ui.start_measuring()
-        var b = start_border(ui)
+        var b = m.start_border()
         var avg = values.average_3bit()
         widget_plot(ui, values, Fg.red if avg>=4 else Fg.green)
         Text(avg) | Fg.green in ui
