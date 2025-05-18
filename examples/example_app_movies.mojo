@@ -57,8 +57,8 @@ def main():
             " " in ui
 
         var stop_measuring_all = start_measuring_all^.stop_measuring()
-        var tmp_area_width = stop_measuring_all.get_rectangle(ui)
-        var area_width = Int(tmp_area_width[1][0] - tmp_area_width[0][0])
+        var tmp_area_width = stop_measuring_all.get_dimensions(ui)
+        var area_width = Int(tmp_area_width[0])
         ui.move_cursor_below(stop_measuring_all^)
         Text("-"*area_width) | Fg.green in ui
         "Add to movies" in ui
