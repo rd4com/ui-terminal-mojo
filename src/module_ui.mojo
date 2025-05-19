@@ -97,12 +97,12 @@ struct Zone:
         self.y = 0
         self.data = Text()
         self.ui_ptr = __type_of(self.ui_ptr)()
-    fn largest_x(self)->Int:
-        current = 0
-        for e in reversed(self.ui_ptr[].zones):
-            if e[].x>=current:
-                current = e[].x
-        return current
+    # fn largest_x(self)->Int:
+    #     current = 0
+    #     for e in reversed(self.ui_ptr[].zones):
+    #         if e[].x>=current:
+    #             current = e[].x
+    #     return current
     fn __ior__(mut self, other: Bg):
         self.data.bg = other.value
     fn __ior__(mut self, other: Fg):
@@ -217,9 +217,9 @@ struct Border:
             ui[-1].data.replace_each_when_render = style_border.up_r # "┐"
 
 
-        var tmp_next_pos = ui.next_position
-        if not tmp_next_pos:
-            tmp_next_pos = XY(ui[-1].x, ui[-1].y+2)
+        # var tmp_next_pos = ui.next_position
+        # if not tmp_next_pos:
+        #     tmp_next_pos = XY(ui[-1].x, ui[-1].y+2)
 
         for i in range(tmp_size[1]-1):
             Text("|") | fg in ui
@@ -252,7 +252,7 @@ struct Border:
             ui[-1].y = h_border_pos
             ui[-1].data.replace_each_when_render = style_border.b_r # "┘"
 
-        ui.next_position = tmp_next_pos
+        # ui.next_position = tmp_next_pos
 
         __disable_del(self)
 
@@ -363,6 +363,7 @@ fn __calculate_width_heigh_from_to(
     var largest_y = Int32.MIN
     if start_len == stop_len:
         return XY(0,0)
+
     var ptr = Pointer(to=ui.zones)
     for i in range(start_len,stop_len):
         if ptr[][i].x < Int(smallest_x):
@@ -373,9 +374,7 @@ fn __calculate_width_heigh_from_to(
             largest_y = ptr[][i].y
         if (ptr[][i].x+len(ptr[][i].data.value)) > Int(largest_x):
             largest_x = (ptr[][i].x+len(ptr[][i].data.value))
-    # var modif_y = Int32(len(ptr[])!=self.start_len)
-    # var x = Int32(True)
-    return XY(largest_x-smallest_x,largest_y-smallest_y+1)
+    return XY(largest_x-smallest_x,(largest_y-smallest_y)+1)
 # └────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -473,42 +472,26 @@ struct UI:
         mut self,
         owned arg: CompletedMeasurment,
     ):
-        var largest_x = Int.MIN
-        var smallest_y = Int.MAX
-        # var largest_y = Int.MIN
-        #TODO: if arg.start_len == arg.stop_len, x= ?
-        for e in range(arg.start_len, arg.stop_len):
-            if e < len(self.zones):
-                # current_pos = self.zones[e].x + StringSlice(self.zones[e].data.value).char_length()
-                # ⬆️ For emojis need to move the cursor by one or two ?
-                current_pos = self.zones[e].x + len(self.zones[e].data.value)
-                if current_pos > largest_x:
-                    largest_x = current_pos
-                if self.zones[e].y < smallest_y:
-                    smallest_y = self.zones[e].y
-                # if self.zones[e].y > largest_y:
-                #     largest_y = self.zones[e].y
-        self.next_position = XY(largest_x, smallest_y)
-        # When no widgets were added:
-        if arg.start_len == arg.stop_len:
-            self.next_position.value()[0] = self[-1].x + len(self[-1].data.value)
-            self.next_position.value()[1] = self[-1].y
+        var dimensions = arg.get_dimensions(self)
+        if all(dimensions == XY(0,0)):
+            self.next_position = XY(
+                self[-1].x + len(self[-1].data.value),
+                self[-1].y
+            )
+            __disable_del(arg)
+            return
+        self.next_position = XY(dimensions[0]+self.zones[arg.start_len].x, self.zones[arg.start_len].y)
         __disable_del(arg)
     fn move_cursor_below(mut self, owned arg: CompletedMeasurment):
-        var largest_y = Int.MIN
-        var smallest_x = Int.MAX
-        for e in range(arg.start_len, arg.stop_len):
-            if e < len(self.zones):
-                current_pos = self.zones[e].x
-                if current_pos < smallest_x:
-                    smallest_x = current_pos
-                if self.zones[e].y > largest_y:
-                    largest_y = self.zones[e].y
-        self.next_position = XY(smallest_x, largest_y+1)
-        # When no widgets were added:
-        if arg.start_len == arg.stop_len:
-            self.next_position.value()[0] = self[-1].x
-            self.next_position.value()[1] = self[-1].y+1
+        var dimensions = arg.get_dimensions(self)
+        if all(dimensions == XY(0,0)):
+            self.next_position = XY(
+                self[-1].x,
+                self[-1].y+1
+            )
+            __disable_del(arg)
+            return
+        self.next_position = XY(self.zones[arg.start_len].x, self.zones[arg.start_len].y+dimensions[1])
         __disable_del(arg)
 
 
@@ -532,16 +515,16 @@ struct UI:
                 return e[]
             current_pos -=1
         # if there is none, could add a new one here:
+        #FIXME: created one if needed
         Text(String()) in self
         return self.zones[len(self.zones)-1]
-        # return self.zones[0] #FIXME: created one if needed
 
-    fn largest_x(self, list: List[Zone])->Int:
-        current = 0
-        for e in reversed(list):
-            if e[].x>=current:
-                current = e[].x
-        return current
+    # fn largest_x(self, list: List[Zone])->Int:
+    #     current = 0
+    #     for e in reversed(list):
+    #         if e[].x>=current:
+    #             current = e[].x
+    #     return current
 
     fn set_tab_menu[f:fn () capturing->None](mut self):
         #TODO: simplify with new self.start_measuring
