@@ -1,5 +1,7 @@
 from .module_simple_backend import *
 from time import sleep, monotonic
+from sys.param_env import env_get_bool
+from builtin._location import __call_location, _SourceLocation
 
 #TODO: replace all with new XY struct
 # ╔════════════════════════════════════════════════════════════════════════════╗
@@ -377,9 +379,18 @@ fn __calculate_width_heigh_from_to(
     return XY(largest_x-smallest_x,(largest_y-smallest_y)+1)
 # └────────────────────────────────────────────────────────────────────────────┘
 
+@value
+struct DebugEntry:
+    var origin: _SourceLocation
+    var position: XY
+    var value: String
+
 
 alias XY = SIMD[DType.int32, 2]
 struct UI:
+    alias is_terminal_debug = env_get_bool["terminal_debug", False]()
+    var terminal_debug: List[DebugEntry] 
+
     var term: term_type
     var term_size: SIMD[DType.uint8, 2]
     var time_counter: TimeCounter
@@ -402,6 +413,9 @@ struct UI:
 
     @deprecated("very experimental, please don't use in prod, please don't do I/O in the 60FPS loop")
     fn __init__(out self, show_pre_start_screen:Bool = True):
+
+        self.terminal_debug = List[DebugEntry]()
+
         constrained[
             simdwidthof[DType.uint8]()>=16,
             "App currently need SIMD for events, at least 16 elements"
@@ -426,7 +440,6 @@ struct UI:
             print("Term size:", self.term_size)
             print("  - resizing not supported yet")
             print("  - emojis partially supported (when measuring horizontally)")
-            print("  - when creating border things, please use start_measuring")
             print("")
             print(
                 "press ",
@@ -503,6 +516,16 @@ struct UI:
             __insert_below(self[-1], arg)
         else:
             __set_first_element(self, arg)
+        @parameter
+        if self.is_terminal_debug:
+            var tmp_ = Pointer(to=self[-1])
+            self.terminal_debug.append(
+                DebugEntry(
+                    __call_location(), 
+                    XY(tmp_[].x, tmp_[].y), 
+                    tmp_[].data.value
+                )
+            )
     @always_inline
     fn append(mut self, arg: Text):
         # Design talk with Owen, for an additional different way to do things
@@ -621,6 +644,10 @@ struct UI:
         #clear ui buffer
         self.zones.clear()
         self.next_position = None
+
+        @parameter
+        if self.is_terminal_debug:
+            self.terminal_debug.clear()
 
     fn handle_event(mut self) -> Bool:
         var ev = self.events.get_k()
@@ -1280,6 +1307,60 @@ fn icons_square[theme:Fg=Fg.default](
         ui[-1].data.replace_each_when_render = String("🞓")
     else:
         ui[-1].data.replace_each_when_render = String("🞐")
+
+# ╔════════════════════════════════════════════════════════════════════════════╗
+# ║ debug_pannel                                                               ║
+# ╚════════════════════════════════════════════════════════════════════════════╝
+
+fn debug_pannel(mut ui: UI):
+    
+    # example:
+    # mojo run -I build -D terminal_debug=True examples/example_debug_pannel.mojo
+    @parameter
+    if not ui.is_terminal_debug:
+        return
+    
+    #With current cursor position:
+    var found: Bool = False
+    var cursor_pos = ui.cursor
+    var idx = 0
+    for v in ui.zones:
+        if cursor_pos[0] >= v[].x:
+            if cursor_pos[0] < (v[].x+len(v[].data.value)):
+                if cursor_pos[1] == v[].y:
+                    found = True
+                    break
+        idx+=1
+
+    if found:
+        var debug_value = ui.terminal_debug[idx]
+        all_screen2 = ui.start_measuring()
+        b = all_screen2.start_border()
+        Text("Debug pannel") | Bg.blue in ui
+ 
+        Text(String("pos:", debug_value.position)) | Fg.blue in ui
+        Text(debug_value.origin) | Bg.blue in ui
+        Text("Value:") | Fg.magenta in ui
+        Text(debug_value.value) | Fg.blue in ui
+        var fg = Fg(ui.zones[idx].data.fg)
+        var bg = Bg(ui.zones[idx].data.bg).to_fg()
+        
+        var tmp_measure = ui.start_measuring()
+        var tmp_border = tmp_measure.start_border()
+        Text("fg color:") in ui
+        widget_color_picker(ui, fg)
+        tmp_border^.end_border(ui, fg)
+        ui.move_cursor_after(tmp_measure^.stop_measuring())
+
+        tmp_measure = ui.start_measuring()
+        tmp_border = tmp_measure.start_border()
+        Text("bg color:") in ui
+        widget_color_picker(ui, bg)
+        tmp_border^.end_border(ui, bg)
+        ui.move_cursor_after(tmp_measure^.stop_measuring())
+        
+        b^.end_border(ui, Fg.blue)
+        ui.move_cursor_below(all_screen2^.stop_measuring())
 
 # ┌───────┐
 # │ Ideas │
