@@ -160,6 +160,26 @@ struct CompletedMeasurment:
         return __calculate_width_heigh_from_to(
             ui, self.start_len, self.stop_len
         )
+    fn hover(self, ui: UI)->Bool:
+        if self.start_len>=len(ui.zones):
+            return False
+        var dimensions = self.get_dimensions(ui)
+        var tmp_ptr = Pointer(to=ui.zones[self.start_len])
+        var start_pos = XY(tmp_ptr[].x, tmp_ptr[].y)
+        return PositionAndDimensions(start_pos, dimensions).__contains__(
+            ui.cursor
+        )
+
+@value
+struct PositionAndDimensions:
+    var start_pos: XY
+    var dimensions: XY
+    fn __contains__(self, pos: XY)->Bool:
+        if any(pos<self.start_pos):
+            return False
+        if any(pos>=(self.start_pos+self.dimensions)):
+            return False
+        return True
 
 # #TODO: create utilities like self.get_width_height:
 # fn is_pos_in_rectangle(value:XY, rectangle:(XY,XY))->Bool:
