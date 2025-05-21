@@ -99,30 +99,21 @@ struct Zone:
         self.y = 0
         self.data = Text()
         self.ui_ptr = __type_of(self.ui_ptr)()
-    # fn largest_x(self)->Int:
-    #     current = 0
-    #     for e in reversed(self.ui_ptr[].zones):
-    #         if e[].x>=current:
-    #             current = e[].x
-    #     return current
     fn __ior__(mut self, other: Bg):
         self.data.bg = other.value
     fn __ior__(mut self, other: Fg):
         self.data.fg = other.value
     fn click(self)->Bool:
         if self.ui_ptr[].click:
-            var cursor = self.ui_ptr[].cursor
-            if self.x <= Int(cursor[0]) < (self.x+len(self.data.value)):
-                if self.y <= Int(cursor[1]) < (self.y+1):
-                    self.ui_ptr[].click = False
-                    return True
-        return False
-    fn hover(self)->Bool:
-        var cursor = self.ui_ptr[].cursor
-        if self.x <= Int(cursor[0]) < (self.x+len(self.data.value)):
-            if self.y <= Int(cursor[1]) < (self.y+1):
+            if self.hover():
+                self.ui_ptr[].click = False
                 return True
         return False
+    fn hover(self)->Bool:
+        return PositionAndDimensions(
+            XY(self.x, self.y),
+            XY(len(self.data.value), 1)
+        ).__contains__(self.ui_ptr[].cursor)
 
 #TODO: simplify to fn move_cursor_after(StartedMeasurment)
 #      so that the function does the .stop_measuring() :thumbsup
@@ -1344,6 +1335,7 @@ fn debug_pannel(mut ui: UI):
     var found: Bool = False
     var cursor_pos = ui.cursor
     var idx = 0
+    #TODO: `ui.get_element_at_pos` or `ui.__getitem__(self, pos: XY)`
     for v in ui.zones:
         if cursor_pos[0] >= v[].x:
             if cursor_pos[0] < (v[].x+len(v[].data.value)):
