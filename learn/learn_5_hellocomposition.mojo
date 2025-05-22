@@ -44,11 +44,15 @@ def main():
 fn show_users(mut ui: UI, users: List[User]):
     "Function to show users."
 
+    var measuring = ui.start_measuring()
+    var b = measuring.start_border()
     for u in users:
         Text(u[].name) in ui
         tooltip(ui, String("city: ", u[].city))
     if not users:
         Text("Empty") | Bg.cyan in ui
+    b^.end_border(ui, Fg.blue)
+    ui.move_cursor_below(measuring^.stop_measuring())
 
 @value
 struct UserAdder[O:MutableOrigin]:

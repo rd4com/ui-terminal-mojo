@@ -141,7 +141,7 @@ struct Events:
             if current == ret.size:
                 return
 
-fn get_term_size(out ret:SIMD[DType.uint8, 2]):
+fn get_term_size(out ret:SIMD[DType.int32, 2]):
     try:
         # ask size:
         print("\033[18t")

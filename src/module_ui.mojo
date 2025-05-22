@@ -41,18 +41,16 @@ fn help_overlay(mut ui:UI):
     Text(" Help overlay") | Bg.magenta | Fg.black in ui
     center[24](ui)
     if ui.help_overlay_is_opened:
-        ui[-1].y = Int(ui.term_size[1]-len(overlay_help)-1)
-        ui[-1].x = 0
+        ui[-1].pos = XY(0, Int(ui.term_size[1]-len(overlay_help)-1))
     else:
-        ui[-1].y = Int(ui.term_size[1]-1)
-        ui[-1].x = 0
+        ui[-1].pos = XY(0, ui.term_size[1]-1)
     if ui[-1].hover():
         ui.help_overlay_is_opened ^= True
 
     @parameter
     for h in range(len(overlay_help)):
         Text(overlay_help[h][0]) in ui
-        ui[-1].x = 0
+        ui[-1].pos[0] = 0
         rjust[24](ui)
         tag(ui, overlay_help[h][1], overlay_help[h][2])
 
@@ -90,13 +88,11 @@ struct Zone:
     #   [0,          10,         1           0 (scroll)         3     1       "123"],
     #]
     # need something simpler, ⬆️ maybe for later
-    var x: Int
-    var y: Int
+    var pos: XY
     var data: Text
     var ui_ptr: UnsafePointer[UI]
     fn __init__(out self):
-        self.x = 0
-        self.y = 0
+        self.pos = XY(0, 0)
         self.data = Text()
         self.ui_ptr = __type_of(self.ui_ptr)()
     fn __ior__(mut self, other: Bg):
@@ -111,7 +107,7 @@ struct Zone:
         return False
     fn hover(self)->Bool:
         return PositionAndDimensions(
-            XY(self.x, self.y),
+            self.pos,
             XY(len(self.data.value), 1)
         ).__contains__(self.ui_ptr[].cursor)
 
@@ -155,8 +151,7 @@ struct CompletedMeasurment:
         if self.start_len>=len(ui.zones):
             return False
         var dimensions = self.get_dimensions(ui)
-        var tmp_ptr = Pointer(to=ui.zones[self.start_len])
-        var start_pos = XY(tmp_ptr[].x, tmp_ptr[].y)
+        var start_pos = ui.zones[self.start_len].pos
         return PositionAndDimensions(start_pos, dimensions).__contains__(
             ui.cursor
         )
@@ -171,16 +166,6 @@ struct PositionAndDimensions:
         if any(pos>=(self.start_pos+self.dimensions)):
             return False
         return True
-
-# #TODO: create utilities like self.get_width_height:
-# fn is_pos_in_rectangle(value:XY, rectangle:(XY,XY))->Bool:
-#     var res = True
-#     if value[1]<rectangle[0][1]: res = False
-#     if value[1]>rectangle[1][1]: res = False
-#     if value[0]<rectangle[0][0]: res = False
-#     if value[0]>rectangle[1][0]: res = False
-#     return res
-
 
 
 # ╔══════════╗
@@ -197,7 +182,7 @@ struct Border:
     fn __init__(out self, mut ui: UI):
         Text(".") in ui
         self.first_border_index = len(ui.zones)-1
-        ui.next_position = XY(ui[-1].x+1, ui[-1].y+1)
+        ui.next_position = ui[-1].pos+1
 
     fn end_border[
         style_border:StyledBorder = StyleBorderSimple
@@ -214,19 +199,16 @@ struct Border:
         ui.zones[self.first_border_index].data.replace_each_when_render = style_border.up_l #"┌"
         if last_border_x == 2:
             Text("-") | fg in ui
-            ui[-1].x = ui.zones[self.first_border_index].x+1
-            ui[-1].y = ui.zones[self.first_border_index].y
+            ui[-1].pos = ui.zones[self.first_border_index].pos + XY(1, 0)
             ui[-1].data.replace_each_when_render = style_border.up_r # "┐"
         else:
             var horizontal_bars = last_border_x-2
             for i in range(horizontal_bars):
                 Text("-") | fg in ui
-                ui[-1].x = ui.zones[self.first_border_index].x+1+i
-                ui[-1].y = ui.zones[self.first_border_index].y
+                ui[-1].pos = ui.zones[self.first_border_index].pos + XY(1+i, 0)
                 ui[-1].data.replace_each_when_render = style_border.h # "─"
             Text("-") | fg in ui
-            ui[-1].x = ui.zones[self.first_border_index].x+last_border_x-1
-            ui[-1].y = ui.zones[self.first_border_index].y
+            ui[-1].pos = ui.zones[self.first_border_index].pos + XY(last_border_x-1, 0)
             ui[-1].data.replace_each_when_render = style_border.up_r # "┐"
 
 
@@ -236,33 +218,28 @@ struct Border:
 
         for i in range(tmp_size[1]-1):
             Text("|") | fg in ui
-            ui[-1].x = ui.zones[self.first_border_index].x
-            ui[-1].y = ui.zones[self.first_border_index].y+Int(i+1)
+            ui[-1].pos =ui.zones[self.first_border_index].pos + XY(0, i+1) 
             ui[-1].data.replace_each_when_render = style_border.v # "│"
             Text("|") | fg in ui
-            ui[-1].x = ui.zones[self.first_border_index].x + Int(tmp_size[0])
-            ui[-1].y = ui.zones[self.first_border_index].y+Int(i+1)
+            ui[-1].pos =ui.zones[self.first_border_index].pos + XY(tmp_size[0], i+1) 
             ui[-1].data.replace_each_when_render = style_border.v # "│"
 
         Text("-") | fg in ui
         ui[-1].data.replace_each_when_render = style_border.b_l # "└"
-        ui[-1].x =ui.zones[self.first_border_index].x
-        var h_border_pos = ui[-1].y
+        ui[-1].pos[0] =ui.zones[self.first_border_index].pos[0]
+        var h_border_pos = ui[-1].pos[1]
         if last_border_x == 2:
             Text("-") | fg in ui
-            ui[-1].x = ui.zones[self.first_border_index].x+1
-            ui[-1].y = h_border_pos
+            ui[-1].pos = XY(ui.zones[self.first_border_index].pos[0]+1, h_border_pos)
             ui[-1].data.replace_each_when_render = style_border.b_r # "┘"
         else:
             var horizontal_bars = last_border_x-2
             for i in range(horizontal_bars):
                 Text("-") | fg in ui
-                ui[-1].x = ui.zones[self.first_border_index].x+1+i
-                ui[-1].y = h_border_pos
+                ui[-1].pos = XY(ui.zones[self.first_border_index].pos[0]+1+i, h_border_pos)
                 ui[-1].data.replace_each_when_render = style_border.h # "─"
             Text("-") | fg in ui
-            ui[-1].x = ui.zones[self.first_border_index].x+last_border_x-1
-            ui[-1].y = h_border_pos
+            ui[-1].pos = XY(ui.zones[self.first_border_index].pos[0]+last_border_x-1, h_border_pos)
             ui[-1].data.replace_each_when_render = style_border.b_r # "┘"
 
         # ui.next_position = tmp_next_pos
@@ -350,44 +327,33 @@ fn __set_first_element(mut ui: UI, arg: Text):
     var tmp_zone = Zone()
     tmp_zone.data = arg
     tmp_zone.ui_ptr = UnsafePointer(to=ui)
-    tmp_zone.x = Int(ui.scroll[0])
-    tmp_zone.y = Int(ui.scroll[1])
+    tmp_zone.pos = ui.scroll
     ui.zones.append(tmp_zone)
 
 fn __insert_below(arg: Zone, owned other: Text):
     var new_zone = arg
-    if arg.ui_ptr[].next_position:
-        var p = arg.ui_ptr[].next_position.value()
-        arg.ui_ptr[].next_position = None
-        new_zone.x = Int(p[0])
-        new_zone.y = Int(p[1])
-        #TODO: one XY
-    else:
-        new_zone.x = arg.x
-        new_zone.y += 1 #set new element.x below this one
     new_zone.data = other
+    if arg.ui_ptr[].next_position:
+        new_zone.pos = arg.ui_ptr[].next_position.value()
+        arg.ui_ptr[].next_position = None
+    else:
+        new_zone.pos += XY(0, 1)
     arg.ui_ptr[].zones.append(new_zone^)
 fn __calculate_width_heigh_from_to(
     ui: UI, start_len: Int, stop_len: Int
 ) -> XY:
-    var smallest_x = Int32.MAX
-    var largest_x = Int32.MIN
-    var smallest_y = Int32.MAX
-    var largest_y = Int32.MIN
+    var smallest = XY(Int32.MAX, Int32.MAX)
+    var largest = XY(Int32.MIN, Int32.MIN)
     if start_len == stop_len:
         return XY(0,0)
 
     var ptr = Pointer(to=ui.zones)
     for i in range(start_len,stop_len):
-        if ptr[][i].x < Int(smallest_x):
-            smallest_x = ptr[][i].x
-        if ptr[][i].y < Int(smallest_y):
-            smallest_y = ptr[][i].y
-        if ptr[][i].y > Int(largest_y):
-            largest_y = ptr[][i].y
-        if (ptr[][i].x+len(ptr[][i].data.value)) > Int(largest_x):
-            largest_x = (ptr[][i].x+len(ptr[][i].data.value))
-    return XY(largest_x-smallest_x,(largest_y-smallest_y)+1)
+        var current = ptr[][i].pos
+        smallest = (current < smallest).select(current, smallest)
+        current += XY(len(ptr[][i].data.value), 0)
+        largest = (current > largest).select(current, largest)
+    return (largest-smallest)+XY(0, 1)
 # └────────────────────────────────────────────────────────────────────────────┘
 
 @value
@@ -398,18 +364,19 @@ struct DebugEntry:
 
 
 alias XY = SIMD[DType.int32, 2]
+
 struct UI:
     alias is_terminal_debug = env_get_bool["terminal_debug", False]()
     var terminal_debug: List[DebugEntry] 
 
     var term: term_type
-    var term_size: SIMD[DType.uint8, 2]
+    var term_size: XY
     var time_counter: TimeCounter
     var events: Events
     alias zones_type = List[Zone]
     var zones: Self.zones_type
-    var cursor: SIMD[DType.int32, 2]
-    var scroll: SIMD[DType.int32, 2]
+    var cursor: XY
+    var scroll: XY
     var next_position: Optional[XY]
     # events:
     var click: Bool
@@ -498,24 +465,18 @@ struct UI:
     ):
         var dimensions = arg.get_dimensions(self)
         if all(dimensions == XY(0,0)):
-            self.next_position = XY(
-                self[-1].x + len(self[-1].data.value),
-                self[-1].y
-            )
+            self.next_position = self[-1].pos + XY(len(self[-1].data.value), 0)
             __disable_del(arg)
             return
-        self.next_position = XY(dimensions[0]+self.zones[arg.start_len].x, self.zones[arg.start_len].y)
+        self.next_position = self.zones[arg.start_len].pos + XY(dimensions[0], 0)
         __disable_del(arg)
     fn move_cursor_below(mut self, owned arg: CompletedMeasurment):
         var dimensions = arg.get_dimensions(self)
         if all(dimensions == XY(0,0)):
-            self.next_position = XY(
-                self[-1].x,
-                self[-1].y+1
-            )
+            self.next_position = self[-1].pos + XY(0, 1)
             __disable_del(arg)
             return
-        self.next_position = XY(self.zones[arg.start_len].x, self.zones[arg.start_len].y+dimensions[1])
+        self.next_position = self.zones[arg.start_len].pos + XY(0, dimensions[1])
         __disable_del(arg)
 
 
@@ -533,7 +494,7 @@ struct UI:
             self.terminal_debug.append(
                 DebugEntry(
                     __call_location(), 
-                    XY(tmp_[].x, tmp_[].y), 
+                    tmp_[].pos, 
                     tmp_[].data.value
                 )
             )
@@ -543,34 +504,30 @@ struct UI:
         arg in self
 
     fn __getitem__(mut self, pos:Int=-1) ->ref[__origin_of(self.zones)]Zone:
-        var current_pos = -1
-        for e in reversed(self.zones):
-            if pos == current_pos:
-                return e[]
-            current_pos -=1
+        if pos < 0:
+            var idx = len(self.zones)+pos
+            if idx >= 0:
+                return self.zones[idx]
+        else:
+            if pos < len(self.zones):
+                return self.zones[pos]
+
         # if there is none, could add a new one here:
         #FIXME: created one if needed
         Text(String()) in self
         return self.zones[len(self.zones)-1]
 
-    # fn largest_x(self, list: List[Zone])->Int:
-    #     current = 0
-    #     for e in reversed(list):
-    #         if e[].x>=current:
-    #             current = e[].x
-    #     return current
-
     fn set_tab_menu[f:fn () capturing->None](mut self):
-        #TODO: simplify with new self.start_measuring
         if self.show_tab_menu:
             var tmp = self.scroll
             self.scroll = 0
             Text("TabMenu") | Bg.yellow | Fg.black in self
             center[16](self)
             f()
-            var largest = 0
+            #TODO: Integrate ui.start_measuring()
+            var largest = Int32(0)
             for e in self.zones:
-                var current = len(e[].data.value)+e[].x
+                var current = len(e[].data.value)+e[].pos[0]
                 if current> largest: largest = current
             self.scroll = tmp
             self.next_position = self.scroll
@@ -596,12 +553,12 @@ struct UI:
         # render ui
         for i in self.zones:
             # TODO debug_assert no overlaps!
-            var x_pos = i[].x
-            var y_pos = i[].y
-            var _width = len(i[].data.value)
-            var screen_width = Int(self.term_size[0])
-            var screen_height = Int(self.term_size[1])
-            var x_start = 0
+            var x_pos = i[].pos[0]
+            var y_pos = i[].pos[1]
+            var _width = Int32(len(i[].data.value))
+            var screen_width = self.term_size[0]
+            var screen_height = self.term_size[1]
+            var x_start = Int32(0)
             var x_end = _width
             if x_pos >= screen_width: continue
             if y_pos >= screen_height: continue
@@ -613,30 +570,19 @@ struct UI:
                 x_end += screen_width-(x_pos+_width)
             if x_pos < 0:
                 x_start += abs(0-x_pos)
-                i[].x=0
+                i[].pos[0]=0
 
-            res += term_type.move_write_cusor_to(i[].x, i[].y)
+            res += term_type.move_write_cusor_to(Int(i[].pos[0]), Int(i[].pos[1]))
             res += term_type.start_colors(Fg(i[].data.fg), Bg(i[].data.bg))
             if i[].data.replace_each_when_render:
-                var tmp_res_ = (i[].data.value[x_start:x_end])
+                var tmp_res_ = i[].data.value[Int(x_start):Int(x_end)]
                 var _replace_with = i[].data.replace_each_when_render.value()
                 var tmp_res2_ = String()
                 for _ in range(len(tmp_res_)):
                     tmp_res2_ += _replace_with
                 res += tmp_res2_
             else:
-                res += (i[].data.value[x_start:x_end])
-
-            # First try for rendering is simple:
-            #-----------------------------------
-            # if not (0 <= (i[].x+len(i[].data.value)) < Int(self.term_size[0])):
-            #     continue
-            # if not (0 <= i[].y < Int(self.term_size[1])):
-            #     continue
-            # res += term_type.move_write_cusor_to(i[].x, i[].y)
-            # res += term_type.start_colors(Fg(i[].data.fg), Bg(i[].data.bg))
-            # res += (i[].data.value)
-            # ----------------------------------
+                res += i[].data.value[Int(x_start):Int(x_end)]
 
         # render cursor
         # TODO: self.cursor = Text("X", ..)
@@ -696,19 +642,16 @@ struct UI:
 
         #TODO limit scrolling to last widget
         #    (inifinite scrolling is great, but need a map lol)
+
         # scroll when cursor goes edge of screen
-        if self.cursor[0]<0:
-            self.cursor[0]=0
-            self.scroll[0]+=1 if not is_fast_nav else fast_nav
-        if self.cursor[0]>=Int(self.term_size[0]):
-            self.cursor[0]=Int(self.term_size[0])-1
-            self.scroll[0]-=1 if not is_fast_nav else fast_nav
-        if self.cursor[1]<0:
-            self.cursor[1]=0
-            self.scroll[1]+= 1 if not is_fast_nav else fast_nav
-        if self.cursor[1]>=Int(self.term_size[1]):
-            self.cursor[1]= Int(self.term_size[1])-1
-            self.scroll[1]-= 1 if not is_fast_nav else fast_nav
+        var changed_value = XY(1 if not is_fast_nav else fast_nav)
+        var check_below = self.cursor<XY(0)
+        var check_above = self.cursor>=self.term_size
+        if any(check_above.join(check_below)):
+            self.cursor = check_above.select(self.term_size-1, self.cursor)
+            self.scroll = check_above.select(self.scroll-changed_value, self.scroll)
+            self.cursor = check_below.select(XY(0), self.cursor)
+            self.scroll = check_below.select(self.scroll+changed_value, self.scroll)
 
 
         if all(ev==Keys.tab):
@@ -734,6 +677,7 @@ struct UI:
         if self.help_overlay_is_opened:
             # no click on elements below the overlay:
             var cursor_in_overlay = False
+            #TODO: Integrate ui.start_measuring
             for i in range(1,20):
                 if "Help overlay" in self[-i].data.value:
                     if self[-i].hover():
@@ -1116,7 +1060,7 @@ fn widget_steps[theme:Fg=Fg.green, spacing:Int = 2](
             ui[-1] |= theme
         ui[-1].data.replace_each_when_render = String("─")
         "*" in ui
-        ui[-1].y -= 1
+        ui[-1].pos[1] -= 1
         ui[-1].data.replace_each_when_render = String("•")
         if idx <= Int(current_step):
             ui[-1] |= theme
@@ -1233,7 +1177,7 @@ fn blink[speed:Int=9](mut ui:UI):
 fn shake[speed:Int=8](mut ui:UI):
     # need another system to be able to animate for x seconds
     constrained[speed >= 8, "speed >= 8"]()
-    ui[-1].x += ((monotonic() // (10**speed))%3)-1
+    ui[-1].pos[0] += ((monotonic() // (10**speed))%3)-1
 
 # ╔════════╗
 # ║ Ticker ║
@@ -1291,9 +1235,9 @@ fn animate_time[theme:Fg=Fg.default](
 fn tag[W:Writable](mut ui:UI, bg: Bg, value: W):
     #TODO: improve so can add more than one
     Text(value) | bg in ui
-    ui[-1].x= len(ui[-2].data.value)+1+ui[-2].x
-    ui[-1].y-=1
-    ui.next_position=XY(ui[-2].x,ui[-2].y+1)
+    ui[-1].pos[0] = len(ui[-2].data.value)+1+ui[-2].pos[0]
+    ui[-1].pos[1]-=1
+    ui.next_position= ui[-2].pos + XY(0, 1)
 
 
 # ╔═══════╗
@@ -1337,9 +1281,9 @@ fn debug_pannel(mut ui: UI):
     var idx = 0
     #TODO: `ui.get_element_at_pos` or `ui.__getitem__(self, pos: XY)`
     for v in ui.zones:
-        if cursor_pos[0] >= v[].x:
-            if cursor_pos[0] < (v[].x+len(v[].data.value)):
-                if cursor_pos[1] == v[].y:
+        if cursor_pos[0] >= v[].pos[0]:
+            if cursor_pos[0] < (v[].pos[0]+len(v[].data.value)):
+                if cursor_pos[1] == v[].pos[1]:
                     found = True
                     break
         idx+=1
