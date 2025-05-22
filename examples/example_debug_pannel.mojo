@@ -18,7 +18,7 @@ def main():
         Text(all_screen.peek_dimensions()) in ui
         
         b^.end_border(ui, Fg.green)
-        ui.move_cursor_below(all_screen^.stop_measuring())
+        all_screen^.stop_measuring().move_cursor_below()
         
         var tmp_ptr = UnsafePointer(
             to=ui.feature_help_overlay

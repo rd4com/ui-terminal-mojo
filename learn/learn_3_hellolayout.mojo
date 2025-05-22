@@ -11,6 +11,6 @@ def main():
             counter+=1
         var measurement = start_measurement^.stop_measuring()
 
-        ui.move_cursor_after(measurement^)
+        measurement^.move_cursor_after()
         "<- it is a counter" in ui
         "<- it is a button" in ui

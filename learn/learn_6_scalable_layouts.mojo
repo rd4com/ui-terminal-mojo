@@ -18,7 +18,7 @@ def main():
         "header" in ui
         widget_slider["Content center"](ui, content_center)
         header_border^.end_border[StyleBorderCurved](ui, Fg.blue)
-        ui.move_cursor_below(top_center_bottom^.stop_measuring())
+        top_center_bottom^.stop_measuring().move_cursor_below()
 
         top_center_bottom =ui.start_measuring()
 
@@ -28,13 +28,13 @@ def main():
         for i in range(Int(content_menu_l)):
             Text("#"*i) in ui
         menu_border^.end_border[StyleBorderDouble](ui, Fg.yellow)
-        ui.move_cursor_after(center^.stop_measuring())
+        center^.stop_measuring().move_cursor_after()
 
         center = ui.start_measuring()
         center_h1 in ui
         for i in range(Int(content_center)):
             Text("*" * i) in ui
-        ui.move_cursor_after(center^.stop_measuring())
+        center^.stop_measuring().move_cursor_after()
 
         center = ui.start_measuring()
         menu_border = center.start_border()
@@ -43,8 +43,8 @@ def main():
             Text("#"*i) in ui
             tooltip(ui, String("^size:",i))
         menu_border^.end_border[StyleBorderDouble](ui, Fg.yellow)
-        ui.move_cursor_below(center^.stop_measuring())
-        ui.move_cursor_below(top_center_bottom^.stop_measuring())
+        center^.stop_measuring().move_cursor_below()
+        top_center_bottom^.stop_measuring().move_cursor_below()
 
         var footer_measure = ui.start_measuring()
         var footer_border = footer_measure.start_border()
@@ -53,7 +53,7 @@ def main():
         widget_slider["Content menu r"](ui, content_menu_r)
         input_buffer["Center:"](ui, center_h1, center_h1_edit)
         footer_border^.end_border[StyleBorderSimple](ui, Fg.green)
-        ui.move_cursor_below(footer_measure^.stop_measuring())
+        footer_measure^.stop_measuring().move_cursor_below()
 
         all_screen_border^.end_border[StyleBorderDouble](ui, Fg.cyan)
-        ui.move_cursor_below(all_screen^.stop_measuring())
+        all_screen^.stop_measuring().move_cursor_below()

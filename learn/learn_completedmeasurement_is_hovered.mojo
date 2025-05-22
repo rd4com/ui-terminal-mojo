@@ -22,16 +22,16 @@ def main():
             
             b^.end_border(ui, current_theme) #todo: end_border returns something to recolor it ?
             var small_measurement_measured = small_measurement^.stop_measuring()
-            var cursor_in_small =  small_measurement_measured.hover(ui)
-            ui.move_cursor_below(small_measurement_measured^)
+            var cursor_in_small =  small_measurement_measured.hover()
+            small_measurement_measured^.move_cursor_below()
             
             if cursor_in_small:
                 Text("^ theses are 5 values") | current_theme.to_bg() in ui
 
         all_screen_b^.end_border(ui, Fg.magenta)
         var all_screen_measurement = all_screen^.stop_measuring()
-        var cursor_in_all_screen = all_screen_measurement.hover(ui)
-        ui.move_cursor_below(all_screen_measurement^)
+        var cursor_in_all_screen = all_screen_measurement.hover()
+        all_screen_measurement^.move_cursor_below()
         if cursor_in_all_screen:
             Text("^ theses are 10 values") | Fg.magenta in ui
 

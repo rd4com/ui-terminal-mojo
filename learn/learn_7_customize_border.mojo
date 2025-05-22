@@ -22,13 +22,13 @@ def main():
         "Hello!" in ui
         widget_slider["Slide",Fg.blue,True](ui, value)
         small_panel_border^.end_border[StyleCustom](ui, Fg.cyan)
-        ui.move_cursor_after(small_panel^.stop_measuring())
+        small_panel^.stop_measuring().move_cursor_after()
         
         var small_panel2 = ui.start_measuring()
         var small_panel_border2 = small_panel2.start_border()
         for i in range(value):
             Text(i) in ui
         small_panel_border2^.end_border[StyleBorderCurved](ui, Fg.magenta)
-        ui.move_cursor_below(small_panel2^.stop_measuring())
+        small_panel2^.stop_measuring().move_cursor_below()
 
-        ui.move_cursor_below(all_screen^.stop_measuring())
+        all_screen^.stop_measuring().move_cursor_below()

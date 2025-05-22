@@ -9,7 +9,7 @@ def main():
         # var start_measuring = ui.start_measuring()
         my_custom_widget(ui, numbers)
         # var stop_measuring = start_measuring^.stop_measuring()
-        # ui.move_cursor_after(stop_measuring^)
+        # stop_measuring^.move_cursor_after()
         "Widget moved the cursor below for user friendlyness" in ui
         # Text("But let's go -> !") | Bg.blue in ui
 
@@ -30,4 +30,4 @@ fn my_custom_widget(mut ui:UI, mut numbers: List[UInt8]):
         var stop_measuring = start_measuring^.stop_measuring()
 
         #move the cursor below that space:
-        ui.move_cursor_below(stop_measuring^)
+        stop_measuring^.move_cursor_below()

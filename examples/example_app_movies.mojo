@@ -33,33 +33,33 @@ def main():
             if len(ui[-1].data.value) >16:
                 ui[-1].data.value = ui[-1].data.value[:16]
 
-            ui.move_cursor_after(start_measuring_col^.stop_measuring())
+            start_measuring_col^.stop_measuring().move_cursor_after()
             start_measuring_col = ui.start_measuring()
             Text("|") | Fg.cyan in ui
             center[8](ui)
 
-            ui.move_cursor_after(start_measuring_col^.stop_measuring())
+            start_measuring_col^.stop_measuring().move_cursor_after()
             start_measuring_col = ui.start_measuring()
             if m[].rating >= 12:
                 widget_slider["Rating", theme=Fg.green](ui, m[].rating)
             else:
                 widget_slider["Rating", theme=Fg.magenta](ui, m[].rating)
 
-            ui.move_cursor_after(start_measuring_col^.stop_measuring())
+            start_measuring_col^.stop_measuring().move_cursor_after()
             start_measuring_col = ui.start_measuring()
             Text("|") | Fg.cyan in ui
             center[8](ui)
 
-            ui.move_cursor_after(start_measuring_col^.stop_measuring())
+            start_measuring_col^.stop_measuring().move_cursor_after()
             widget_value_selector["Genre"](ui, m[].genre,genres)
 
-            ui.move_cursor_below(start_measuring_row^.stop_measuring())
+            start_measuring_row^.stop_measuring().move_cursor_below()
             " " in ui
 
         var stop_measuring_all = start_measuring_all^.stop_measuring()
-        var tmp_area_width = stop_measuring_all.get_dimensions(ui)
+        var tmp_area_width = stop_measuring_all.get_dimensions()
         var area_width = Int(tmp_area_width[0])
-        ui.move_cursor_below(stop_measuring_all^)
+        stop_measuring_all^.move_cursor_below()
         Text("-"*area_width) | Fg.green in ui
         "Add to movies" in ui
         ui[-1] |= Bg.blue

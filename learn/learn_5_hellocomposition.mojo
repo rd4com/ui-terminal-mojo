@@ -38,7 +38,7 @@ def main():
         Text("Users page") | Bg.blue in ui
         var start_measuring = ui.start_measuring()
         show_users(ui, current_list[])
-        ui.move_cursor_after(start_measuring^.stop_measuring())
+        start_measuring^.stop_measuring().move_cursor_after()
         user_adder.render(current_list[])
 
 fn show_users(mut ui: UI, users: List[User]):
@@ -52,7 +52,7 @@ fn show_users(mut ui: UI, users: List[User]):
     if not users:
         Text("Empty") | Bg.cyan in ui
     b^.end_border(ui, Fg.blue)
-    ui.move_cursor_below(measuring^.stop_measuring())
+    measuring^.stop_measuring().move_cursor_below()
 
 @value
 struct UserAdder[O:MutableOrigin]:

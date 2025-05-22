@@ -122,7 +122,7 @@ struct StartedMeasurment[O:MutableOrigin]:
     fn __init__(out self, ref [O] ui: UI):
         self.start_len = len(ui.zones)
         self.ui_ptr = Pointer(to=ui)
-    fn stop_measuring(owned self, out ret: CompletedMeasurment):
+    fn stop_measuring(owned self, out ret: CompletedMeasurment[O]):
         ret = CompletedMeasurment(self^)
     fn peek_dimensions(self)->XY:
         """[width,height]."""
@@ -134,27 +134,46 @@ struct StartedMeasurment[O:MutableOrigin]:
 
 
 @explicit_destroy()
-struct CompletedMeasurment:
+struct CompletedMeasurment[O:MutableOrigin]:
     var start_len: Int
     var stop_len: Int
+    var ui_ptr: Pointer[UI, O]
     # the len of ui.zones when finished measuring
-    fn __init__(out self, owned arg: StartedMeasurment):
+    fn __init__(out self, owned arg: StartedMeasurment[O]):
         self.start_len = arg.start_len
         self.stop_len = len(arg.ui_ptr[].zones)
+        self.ui_ptr = arg.ui_ptr
         __disable_del(arg)
-    fn get_dimensions(self, ui: UI)->XY:
+    fn get_dimensions(self)->XY:
         """[width,height]."""
         return __calculate_width_heigh_from_to(
-            ui, self.start_len, self.stop_len
+            self.ui_ptr[], self.start_len, self.stop_len
         )
-    fn hover(self, ui: UI)->Bool:
-        if self.start_len>=len(ui.zones):
+    fn hover(self)->Bool:
+        if self.start_len>=len(self.ui_ptr[].zones):
             return False
-        var dimensions = self.get_dimensions(ui)
-        var start_pos = ui.zones[self.start_len].pos
+        var dimensions = self.get_dimensions()
+        var start_pos = self.ui_ptr[].zones[self.start_len].pos
         return PositionAndDimensions(start_pos, dimensions).__contains__(
-            ui.cursor
+            self.ui_ptr[].cursor
         )
+
+    fn move_cursor_after(owned self):
+        var dimensions = self.get_dimensions()
+        if all(dimensions == XY(0,0)):
+            self.ui_ptr[].next_position = self.ui_ptr[][-1].pos + XY(len(self.ui_ptr[][-1].data.value), 0)
+            __disable_del(self)
+            return
+        self.ui_ptr[].next_position = self.ui_ptr[].zones[self.start_len].pos + XY(dimensions[0], 0)
+        __disable_del(self)
+    fn move_cursor_below(owned self):
+        var dimensions = self.get_dimensions()
+        if all(dimensions == XY(0,0)):
+            self.ui_ptr[].next_position = self.ui_ptr[][-1].pos + XY(0, 1)
+            __disable_del(self)
+            return
+        self.ui_ptr[].next_position = self.ui_ptr[].zones[self.start_len].pos + XY(0, dimensions[1])
+        __disable_del(self)
 
 @value
 struct PositionAndDimensions:
@@ -458,28 +477,6 @@ struct UI:
 
     fn start_measuring(mut self) -> StartedMeasurment[__origin_of(self)]:
         return StartedMeasurment(self)
-
-    fn move_cursor_after(
-        mut self,
-        owned arg: CompletedMeasurment,
-    ):
-        var dimensions = arg.get_dimensions(self)
-        if all(dimensions == XY(0,0)):
-            self.next_position = self[-1].pos + XY(len(self[-1].data.value), 0)
-            __disable_del(arg)
-            return
-        self.next_position = self.zones[arg.start_len].pos + XY(dimensions[0], 0)
-        __disable_del(arg)
-    fn move_cursor_below(mut self, owned arg: CompletedMeasurment):
-        var dimensions = arg.get_dimensions(self)
-        if all(dimensions == XY(0,0)):
-            self.next_position = self[-1].pos + XY(0, 1)
-            __disable_del(arg)
-            return
-        self.next_position = self.zones[arg.start_len].pos + XY(0, dimensions[1])
-        __disable_del(arg)
-
-
 
     @always_inline
     fn __contains__(mut self, arg: Text):
@@ -818,14 +815,14 @@ fn widget_slider[
     var start_label_v_measuring = ui.start_measuring()
     var start_label_measuring = ui.start_measuring()
     Text(String(label,":")) | theme in ui
-    ui.move_cursor_after(start_label_measuring^.stop_measuring())
+    start_label_measuring^.stop_measuring().move_cursor_after()
     String(value) in ui
-    ui.move_cursor_below(start_label_v_measuring^.stop_measuring())
+    start_label_v_measuring^.stop_measuring().move_cursor_below()
 
     var widget_measurement = ui.start_measuring()
     var start_h_measurement = ui.start_measuring()
     Text("[") | theme in ui
-    ui.move_cursor_after(start_h_measurement^.stop_measuring())
+    start_h_measurement^.stop_measuring().move_cursor_after()
     for i in range(16):
         start_h_measurement = ui.start_measuring()
         if i == Int(value):
@@ -838,9 +835,9 @@ fn widget_slider[
             if preview_value:
                 if ui[-1].hover():
                     Text(i) | theme in ui
-        ui.move_cursor_after(start_h_measurement^.stop_measuring())
+        start_h_measurement^.stop_measuring().move_cursor_after()
     Text("]") | theme in ui
-    ui.move_cursor_below(widget_measurement^.stop_measuring())
+    widget_measurement^.stop_measuring().move_cursor_below()
 
 fn widget_value_selector[
     T:Copyable&Movable&Representable,
@@ -861,21 +858,21 @@ fn widget_value_selector[
         if selected < 0:
             selected = len(values)-1
             selected = selected%len(values)
-    ui.move_cursor_after(start_label_measuring^.stop_measuring())
+    start_label_measuring^.stop_measuring().move_cursor_after()
     start_label_measuring = ui.start_measuring()
     "|" in ui
-    ui.move_cursor_after(start_label_measuring^.stop_measuring())
+    start_label_measuring^.stop_measuring().move_cursor_after()
     start_label_measuring = ui.start_measuring()
     Text(">") | theme.to_bg() in ui
     if ui[-1].click():
         selected += 1
         selected = selected%len(values)
-    ui.move_cursor_after(start_label_measuring^.stop_measuring())
+    start_label_measuring^.stop_measuring().move_cursor_after()
     start_label_measuring = ui.start_measuring()
     Text(String(" ",label)) | theme in ui
-    ui.move_cursor_after(start_label_measuring^.stop_measuring())
+    start_label_measuring^.stop_measuring().move_cursor_after()
     repr(values[selected]) in ui
-    ui.move_cursor_below(start_label_v_measuring^.stop_measuring())
+    start_label_v_measuring^.stop_measuring().move_cursor_below()
 
 fn widget_selection_group[
     T:Copyable&Movable&Representable,
@@ -893,12 +890,12 @@ fn widget_selection_group[
             var start_label_measuring = ui.start_measuring()
             var start_v_measuring = ui.start_measuring()
             Text("[") | theme in ui
-            ui.move_cursor_after(start_label_measuring^.stop_measuring())
+            start_label_measuring^.stop_measuring().move_cursor_after()
             start_label_measuring = ui.start_measuring()
             Text(repr(values[v])) in ui
-            ui.move_cursor_after(start_label_measuring^.stop_measuring())
+            start_label_measuring^.stop_measuring().move_cursor_after()
             Text("]") | theme in ui
-            ui.move_cursor_below(start_v_measuring^.stop_measuring())
+            start_v_measuring^.stop_measuring().move_cursor_below()
         else:
             Text(repr(values[v])) in ui
             if ui[-1].click():
@@ -910,19 +907,19 @@ fn widget_percent_bar[theme: Fg=Fg.green](mut ui: UI, value:Int):
     var widget_measuring = ui.start_measuring()
     var start_measuring = ui.start_measuring()
     Text(value, "%")|theme in ui
-    ui.move_cursor_after(start_measuring^.stop_measuring())
+    start_measuring^.stop_measuring().move_cursor_after()
     start_measuring = ui.start_measuring()
     " [" in ui
-    ui.move_cursor_after(start_measuring^.stop_measuring())
+    start_measuring^.stop_measuring().move_cursor_after()
     for i in range(10):
         start_measuring = ui.start_measuring()
         if i < current: Text("#")|theme in ui
         elif i == current:
             spinner(ui)
         else: "." in ui
-        ui.move_cursor_after(start_measuring^.stop_measuring())
+        start_measuring^.stop_measuring().move_cursor_after()
     "]" in ui
-    ui.move_cursor_below(widget_measuring^.stop_measuring())
+    widget_measuring^.stop_measuring().move_cursor_below()
 
 fn widget_percent_bar_with_speed[theme: Fg=Fg.green](mut ui: UI, value:Int, speed_up_to_two: Int):
     """Percent bar: `[#####/.....]`.
@@ -944,19 +941,19 @@ fn widget_percent_bar_with_speed[theme: Fg=Fg.green](mut ui: UI, value:Int, spee
     var widget_measuring = ui.start_measuring()
     var start_measuring = ui.start_measuring()
     Text(value, "%")|theme in ui
-    ui.move_cursor_after(start_measuring^.stop_measuring())
+    start_measuring^.stop_measuring().move_cursor_after()
     start_measuring = ui.start_measuring()
     " [" in ui
-    ui.move_cursor_after(start_measuring^.stop_measuring())
+    start_measuring^.stop_measuring().move_cursor_after()
     for i in range(10):
         start_measuring = ui.start_measuring()
         if i < current: Text("#")|theme in ui
         elif i == current:
             current_spinner in ui
         else: "." in ui
-        ui.move_cursor_after(start_measuring^.stop_measuring())
+        start_measuring^.stop_measuring().move_cursor_after()
     "]" in ui
-    ui.move_cursor_below(widget_measuring^.stop_measuring())
+    widget_measuring^.stop_measuring().move_cursor_below()
 
 @value
 struct Notification:
@@ -1032,8 +1029,8 @@ fn widget_plot(mut ui: UI, values: WidgetPlotSIMDQueue, theme:Fg = Fg.default):
         ui[-1].data.replace_each_when_render = ValuesUI[current_value&7]
         if ui[-1].hover():
             Text(current_value&7) in ui
-        ui.move_cursor_after(start_measuring^.stop_measuring())
-    ui.move_cursor_below(widget_measuring^.stop_measuring())
+        start_measuring^.stop_measuring().move_cursor_after()
+    widget_measuring^.stop_measuring().move_cursor_below()
 
 fn widget_steps[theme:Fg=Fg.green, spacing:Int = 2](
     mut ui: UI,
@@ -1048,9 +1045,9 @@ fn widget_steps[theme:Fg=Fg.green, spacing:Int = 2](
         Text(String(s[]), " "*spacing) in ui
         if idx == Int(current_step):
             ui[-1] |= theme
-        ui.move_cursor_after(step_measure^.stop_measuring())
+        step_measure^.stop_measuring().move_cursor_after()
         idx+=1
-    ui.move_cursor_below(start_measure_all_widget^.stop_measuring())
+    start_measure_all_widget^.stop_measuring().move_cursor_below()
     start_measure_all_widget = ui.start_measuring()
     idx = 0
     for s in steps:
@@ -1064,12 +1061,12 @@ fn widget_steps[theme:Fg=Fg.green, spacing:Int = 2](
         ui[-1].data.replace_each_when_render = String("•")
         if idx <= Int(current_step):
             ui[-1] |= theme
-        ui.move_cursor_after(step_measure^.stop_measuring())
+        step_measure^.stop_measuring().move_cursor_after()
         idx+=1
     if Int(current_step)>= len(steps):
         Text(" Complete!") | theme in ui
 
-    ui.move_cursor_below(start_measure_all_widget^.stop_measuring())
+    start_measure_all_widget^.stop_measuring().move_cursor_below()
 
 # TODO: need fix len for emojis and border (to move cursor by 1)
 # fn with_border[fg:Fg=Fg(0),bg:Bg=Bg(0)](mut ui: UI, arg:String):
@@ -1127,12 +1124,12 @@ fn widget_color_picker[preview_hover:Bool = True](mut ui:UI, mut value: Fg):
         @parameter
         if preview_hover:
             if ui[-1].hover():
-                ui.move_cursor_after(start_measuring2^.stop_measuring())
+                start_measuring2^.stop_measuring().move_cursor_after()
                 start_measuring2 = ui.start_measuring()
                 Text("example") | Fg(values[i]) in ui
-        ui.move_cursor_after(start_measuring2^.stop_measuring())
+        start_measuring2^.stop_measuring().move_cursor_after()
     var stop_measuring = start_measuring^.stop_measuring()
-    ui.move_cursor_below(stop_measuring^)
+    stop_measuring^.move_cursor_below()
 
 
 fn widget_progress_bar_thin[theme:Fg=Fg.green, width:Int=20](mut ui:UI, percentage: UInt8):
@@ -1146,12 +1143,12 @@ fn widget_progress_bar_thin[theme:Fg=Fg.green, width:Int=20](mut ui:UI, percenta
         if (i*smallest)<=Int(percentage):
             if percentage!=0:
                 ui[-1] |= theme
-        ui.move_cursor_after(start_measuring2^.stop_measuring())
+        start_measuring2^.stop_measuring().move_cursor_after()
 
     Text(String(" ", percentage, "%")) | theme in ui
 
     var stop_measuring = start_measuring^.stop_measuring()
-    ui.move_cursor_below(stop_measuring^)
+    stop_measuring^.move_cursor_below()
 
 fn animate_emojis[values: List[String]](mut ui: UI):
     constrained[len(values)>=1, "At least one emoji"]()
@@ -1306,17 +1303,17 @@ fn debug_pannel(mut ui: UI):
         Text("fg color:") in ui
         widget_color_picker(ui, fg)
         tmp_border^.end_border(ui, fg)
-        ui.move_cursor_after(tmp_measure^.stop_measuring())
+        tmp_measure^.stop_measuring().move_cursor_after()
 
         tmp_measure = ui.start_measuring()
         tmp_border = tmp_measure.start_border()
         Text("bg color:") in ui
         widget_color_picker(ui, bg)
         tmp_border^.end_border(ui, bg)
-        ui.move_cursor_after(tmp_measure^.stop_measuring())
+        tmp_measure^.stop_measuring().move_cursor_after()
         
         b^.end_border(ui, Fg.blue)
-        ui.move_cursor_below(all_screen2^.stop_measuring())
+        all_screen2^.stop_measuring().move_cursor_below()
 
 # ┌───────┐
 # │ Ideas │

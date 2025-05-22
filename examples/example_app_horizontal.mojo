@@ -93,13 +93,13 @@ fn main():
             ljust[8](ui)
             if ui[-1].click(): s[].start+=1
             tooltip[Bg.green](ui, String(s[].start))
-            ui.move_cursor_after(tmp_measurement^.stop_measuring())
+            tmp_measurement^.stop_measuring().move_cursor_after()
 
             # show stop
             Text(s[].stop) in ui
             if ui[-1].click(): s[].stop+=1
             tooltip[Bg.red](ui, String(s[].stop))
             ljust[8](ui)
-            ui.move_cursor_below(group_measurement^.stop_measuring())
+            group_measurement^.stop_measuring().move_cursor_below()
 
             " " in ui
