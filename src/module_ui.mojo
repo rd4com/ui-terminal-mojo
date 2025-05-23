@@ -129,8 +129,8 @@ struct StartedMeasurment[O:MutableOrigin]:
         return __calculate_width_heigh_from_to(
             self.ui_ptr[], self.start_len, len(self.ui_ptr[].zones)
         )
-    fn start_border(mut self) -> Border:
-        return Border(self.ui_ptr[])
+    fn start_border(mut self) -> Border[__origin_of(self)]:
+        return Border[__origin_of(self)](self.ui_ptr[])
 
 
 @explicit_destroy()
@@ -194,7 +194,12 @@ struct PositionAndDimensions:
 # First implementation for creating bordering,
 # seem to work but quite experimental:
 @explicit_destroy
-struct Border:
+struct Border[M_O:MutableOrigin]:
+    # M_O is the origin of an `StartedMeasurment`.
+    # If `started_measurement^.stop_measuring()` is done before `self^.end_border()`,
+    # there is an error of uninitialized Origin.
+    # That way, the border is in the measurement!
+
     var first_border_index: Int
     #TODO: var ptr: Pointer[StartedMeasurment, Origin]
     # (So that still measuring when end_border is done)
