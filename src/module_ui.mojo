@@ -78,8 +78,7 @@ fn rjust[width:Int](mut ui: UI):
 # ║ Zone                                                                       ║
 # ╚════════════════════════════════════════════════════════════════════════════╝
 
-@value
-struct Zone:
+struct Zone(Movable,Copyable):
     #    parent idx  relative_x  relative_y  apply_to_nested_x/y    width height  data
     #[
     #   [0,          0,          0           0 (scroll)         24    10      ""   ],
@@ -175,8 +174,8 @@ struct CompletedMeasurment[O:MutableOrigin]:
         self.ui_ptr[].next_position = self.ui_ptr[].zones[self.start_len].pos + XY(0, dimensions[1])
         __disable_del(self)
 
-@value
-struct PositionAndDimensions:
+@fieldwise_init
+struct PositionAndDimensions(Movable, Copyable):
     var start_pos: XY
     var dimensions: XY
     fn __contains__(self, pos: XY)->Bool:
@@ -380,8 +379,8 @@ fn __calculate_width_heigh_from_to(
     return (largest-smallest)+XY(0, 1)
 # └────────────────────────────────────────────────────────────────────────────┘
 
-@value
-struct DebugEntry:
+@fieldwise_init
+struct DebugEntry(Copyable, Movable):
     var origin: _SourceLocation
     var position: XY
     var value: String
@@ -529,7 +528,7 @@ struct UI:
             #TODO: Integrate ui.start_measuring()
             var largest = Int32(0)
             for e in self.zones:
-                var current = len(e[].data.value)+e[].pos[0]
+                var current = len(e.data.value)+e.pos[0]
                 if current> largest: largest = current
             self.scroll = tmp
             self.next_position = self.scroll
@@ -553,11 +552,11 @@ struct UI:
         ret = self.handle_event()
 
         # render ui
-        for i in self.zones:
+        for ref i in self.zones:
             # TODO debug_assert no overlaps!
-            var x_pos = i[].pos[0]
-            var y_pos = i[].pos[1]
-            var _width = Int32(len(i[].data.value))
+            var x_pos = i.pos[0]
+            var y_pos = i.pos[1]
+            var _width = Int32(len(i.data.value))
             var screen_width = self.term_size[0]
             var screen_height = self.term_size[1]
             var x_start = Int32(0)
@@ -572,19 +571,19 @@ struct UI:
                 x_end += screen_width-(x_pos+_width)
             if x_pos < 0:
                 x_start += abs(0-x_pos)
-                i[].pos[0]=0
+                i.pos[0]=0
 
-            res += term_type.move_write_cusor_to(Int(i[].pos[0]), Int(i[].pos[1]))
-            res += term_type.start_colors(Fg(i[].data.fg), Bg(i[].data.bg))
-            if i[].data.replace_each_when_render:
-                var tmp_res_ = i[].data.value[Int(x_start):Int(x_end)]
-                var _replace_with = i[].data.replace_each_when_render.value()
+            res += term_type.move_write_cusor_to(Int(i.pos[0]), Int(i.pos[1]))
+            res += term_type.start_colors(Fg(i.data.fg), Bg(i.data.bg))
+            if i.data.replace_each_when_render:
+                var tmp_res_ = i.data.value[Int(x_start):Int(x_end)]
+                var _replace_with = i.data.replace_each_when_render.value()
                 var tmp_res2_ = String()
                 for _ in range(len(tmp_res_)):
                     tmp_res2_ += _replace_with
                 res += tmp_res2_
             else:
-                res += i[].data.value[Int(x_start):Int(x_end)]
+                res += i.data.value[Int(x_start):Int(x_end)]
 
         # render cursor
         # TODO: self.cursor = Text("X", ..)
@@ -698,8 +697,8 @@ struct UI:
 # ╔════════════════════════════════════════════════════════════════════════════╗
 # ║ FrameIterator                                                              ║
 # ╚════════════════════════════════════════════════════════════════════════════╝
-@value
-struct FrameIterator[O:MutableOrigin]:
+@fieldwise_init
+struct FrameIterator[O:MutableOrigin](Movable, Copyable):
     var ui_ptr: Pointer[UI, O]
     var last_iteration: Bool
     fn __init__(out self, ref[O]ui: UI):
@@ -960,8 +959,8 @@ fn widget_percent_bar_with_speed[theme: Fg=Fg.green](mut ui: UI, value:Int, spee
     "]" in ui
     widget_measuring^.stop_measuring().move_cursor_below()
 
-@value
-struct Notification:
+@fieldwise_init
+struct Notification(Movable, Copyable):
     var creation_time: UInt
     var auto_fade_second: UInt
     var value: String
@@ -1004,10 +1003,10 @@ fn widget_notification_area[
             Text("^Click to close") | Bg.blue in ui
     if to_del:
         for v in reversed(to_del):
-            _ = storage.pop(v[])
+            _ = storage.pop(v)
 
-@value
-struct WidgetPlotSIMDQueue:
+@fieldwise_init
+struct WidgetPlotSIMDQueue(Movable, Copyable):
     alias size = 16
     var values: SIMD[DType.uint8, Self.size]
     fn __init__(out self):
@@ -1047,7 +1046,7 @@ fn widget_steps[theme:Fg=Fg.green, spacing:Int = 2](
     var idx = 0
     for s in steps:
         var step_measure = ui.start_measuring()
-        Text(String(s[]), " "*spacing) in ui
+        Text(String(s), " "*spacing) in ui
         if idx == Int(current_step):
             ui[-1] |= theme
         step_measure^.stop_measuring().move_cursor_after()
@@ -1057,7 +1056,7 @@ fn widget_steps[theme:Fg=Fg.green, spacing:Int = 2](
     idx = 0
     for s in steps:
         var step_measure = ui.start_measuring()
-        Text(String("-"*(spacing+len(s[])))) in ui
+        Text(String("-"*(spacing+len(s)))) in ui
         if idx == Int(current_step):
             ui[-1] |= theme
         ui[-1].data.replace_each_when_render = String("─")
@@ -1283,9 +1282,9 @@ fn debug_pannel(mut ui: UI):
     var idx = 0
     #TODO: `ui.get_element_at_pos` or `ui.__getitem__(self, pos: XY)`
     for v in ui.zones:
-        if cursor_pos[0] >= v[].pos[0]:
-            if cursor_pos[0] < (v[].pos[0]+len(v[].data.value)):
-                if cursor_pos[1] == v[].pos[1]:
+        if cursor_pos[0] >= v.pos[0]:
+            if cursor_pos[0] < (v.pos[0]+len(v.data.value)):
+                if cursor_pos[1] == v.pos[1]:
                     found = True
                     break
         idx+=1

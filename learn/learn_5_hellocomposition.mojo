@@ -1,7 +1,7 @@
 from `ui-terminal-mojo` import *
 
-@value
-struct User:
+@fieldwise_init
+struct User(Copyable, Movable):
     var name: String
     var city: String
 
@@ -47,15 +47,15 @@ fn show_users(mut ui: UI, users: List[User]):
     var measuring = ui.start_measuring()
     var b = measuring.start_border()
     for u in users:
-        Text(u[].name) in ui
-        tooltip(ui, String("city: ", u[].city))
+        Text(u.name) in ui
+        tooltip(ui, String("city: ", u.city))
     if not users:
         Text("Empty") | Bg.cyan in ui
     b^.end_border(ui, Fg.blue)
     measuring^.stop_measuring().move_cursor_below()
 
-@value
-struct UserAdder[O:MutableOrigin]:
+@fieldwise_init
+struct UserAdder[O:MutableOrigin](Movable, Copyable):
     var input_name: String
     var input_city: String
     var input_name_is_edited: Bool

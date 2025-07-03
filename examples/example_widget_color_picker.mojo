@@ -6,5 +6,5 @@ def main():
         Fg.green, Fg.cyan, Fg.magenta, Fg.yellow
     )
     for _ in ui:
-        for v in values:
-            widget_color_picker(ui, v[])
+        for ref v in values:
+            widget_color_picker(ui, v)

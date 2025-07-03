@@ -15,8 +15,8 @@ def main():
         "Users" in ui
         tag(ui, Bg.blue, len(users))
         for u in users:
-            Text(u[][0]) in ui
-            tooltip(ui, String("city: ", u[][1]))
+            Text(u[0]) in ui
+            tooltip(ui, String("city: ", u[1]))
 
         input_buffer["Name:"](ui, input_name, input_name_is_edited)
         input_buffer["City:"](ui, input_city, input_city_is_edited)

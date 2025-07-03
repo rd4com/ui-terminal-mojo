@@ -1,15 +1,15 @@
 from `ui-terminal-mojo` import *
 from collections import Dict
 
-@value
-struct Project:
+@fieldwise_init
+struct Project(Copyable, Movable):
     var name: String
     var is_edited_name: Bool
     var bpm: Int
     var sounds: Dict[String, Int]
     var sequences: List[Sequence]
-@value
-struct Sequence:
+@fieldwise_init
+struct Sequence(Copyable, Movable):
     var audio_name: String
     var start: Int
     var stop: Int
@@ -53,12 +53,12 @@ fn main():
 
         if show_loadable_audios:
             for e in example_audios_to_load:
-                Text(e[][0]) in ui
-                tooltip[Bg.blue](ui, String("^size:", e[][1]) )
+                Text(e[0]) in ui
+                tooltip[Bg.blue](ui, String("^size:", e[1]) )
                 if ui[-2].click():
                     # if already loaded, no append:
-                    if e[][0] not in project.sounds:
-                        project.sounds[e[][0]] = e[][1]
+                    if e[0] not in project.sounds:
+                        project.sounds[e[0]] = e[1]
 
         " " in ui
 
@@ -70,14 +70,14 @@ fn main():
             )
 
         # widget to show and change sequences
-        for s in project.sequences:
-            input_buffer["Audio:"](ui, s[].audio_name, s[].is_edited_audio_name)
+        for ref s in project.sequences:
+            input_buffer["Audio:"](ui, s.audio_name, s.is_edited_audio_name)
 
             #make previous widget 16 cells fixed:
             ljust[16](ui)
 
             # stop if is not in project
-            if not s[].audio_name in project.sounds:
+            if not s.audio_name in project.sounds:
                 # show this error message
                 "Not in audios !" in ui
                 ui[-1] |= Bg.magenta
@@ -89,16 +89,16 @@ fn main():
             var group_measurement = ui.start_measuring()
             var tmp_measurement = ui.start_measuring()
             # show start
-            Text(s[].start) in ui
+            Text(s.start) in ui
             ljust[8](ui)
-            if ui[-1].click(): s[].start+=1
-            tooltip[Bg.green](ui, String(s[].start))
+            if ui[-1].click(): s.start+=1
+            tooltip[Bg.green](ui, String(s.start))
             tmp_measurement^.stop_measuring().move_cursor_after()
 
             # show stop
-            Text(s[].stop) in ui
-            if ui[-1].click(): s[].stop+=1
-            tooltip[Bg.red](ui, String(s[].stop))
+            Text(s.stop) in ui
+            if ui[-1].click(): s.stop+=1
+            tooltip[Bg.red](ui, String(s.stop))
             ljust[8](ui)
             group_measurement^.stop_measuring().move_cursor_below()
 

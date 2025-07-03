@@ -1,7 +1,7 @@
 from `ui-terminal-mojo` import *
 
-@value
-struct Movie:
+@fieldwise_init
+struct Movie(Movable, Copyable):
     var title: String
     var rating: UInt8
     var genre: Int
@@ -25,10 +25,10 @@ def main():
         "Movies" in ui
         tag(ui, Bg.blue, len(movies))
         var start_measuring_all = ui.start_measuring()
-        for m in movies:
+        for ref m in movies:
             var start_measuring_row = ui.start_measuring()
             var start_measuring_col = ui.start_measuring()
-            Text(m[].title) | Fg.blue in ui
+            Text(m.title) | Fg.blue in ui
             ljust[16](ui)
             if len(ui[-1].data.value) >16:
                 ui[-1].data.value = ui[-1].data.value[:16]
@@ -40,10 +40,10 @@ def main():
 
             start_measuring_col^.stop_measuring().move_cursor_after()
             start_measuring_col = ui.start_measuring()
-            if m[].rating >= 12:
-                widget_slider["Rating", theme=Fg.green](ui, m[].rating)
+            if m.rating >= 12:
+                widget_slider["Rating", theme=Fg.green](ui, m.rating)
             else:
-                widget_slider["Rating", theme=Fg.magenta](ui, m[].rating)
+                widget_slider["Rating", theme=Fg.magenta](ui, m.rating)
 
             start_measuring_col^.stop_measuring().move_cursor_after()
             start_measuring_col = ui.start_measuring()
@@ -51,7 +51,7 @@ def main():
             center[8](ui)
 
             start_measuring_col^.stop_measuring().move_cursor_after()
-            widget_value_selector["Genre"](ui, m[].genre,genres)
+            widget_value_selector["Genre"](ui, m.genre,genres)
 
             start_measuring_row^.stop_measuring().move_cursor_below()
             " " in ui

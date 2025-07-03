@@ -20,9 +20,9 @@ fn my_custom_widget(mut ui:UI, mut numbers: List[UInt8]):
 
         #start border (and include it in measurement)
         var border = start_measuring.start_border()
-        for n in numbers:
+        for ref n in numbers:
             #compose with another widget
-            widget_slider["Value:"](ui, n[])
+            widget_slider["Value:"](ui, n)
         #stop border (and include it in measurement)
         border^.end_border(ui, Fg.magenta)
 

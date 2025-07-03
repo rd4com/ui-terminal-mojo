@@ -4,5 +4,6 @@
 # magic environments
 .magic
 magic.lock
+pixi.lock
 # the build pkg
 build/*.mojopkg

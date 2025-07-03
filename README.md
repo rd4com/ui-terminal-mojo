@@ -4,6 +4,9 @@
  ╰══════┼═════─═══╝  
 ```
 
+🟢 Upgraded for `25.5.0.dev2025070207`  
+🆕 Checkout this more advanced example: [File explorer](./examples/example_file_explorer.mojo)  
+
 <img src="./_output.gif" />  
 
 #### Expect changes: Learning by building!
@@ -22,7 +25,7 @@ It is early here for the enthusiastic community of builders
 &nbsp;
 
 Dependencies  
-└ No need to install anything extra, just `🪄magic` and `🔥mojo`.  
+└ No need to install anything extra, just `🔥mojo` and `🪄pixi, uv, pip,..`.  
 
 CPU need `🔢SIMD` vectors of at least 16 elements (`UInt8`)  
 (For events)  
@@ -37,13 +40,14 @@ Future plans:
 
 &nbsp;
 
-Mojo🔥 and 🪄Magic:  
+Mojo🔥:  
 
 💗 Thanks to modular team and all the contributors.  
 I could not program lower level before mojo existed,
 now it is fun and learning is easy.
 
 🌟 Thanks to @owenhilyard for feedbacks and encouragements !
+Great job to the Pixi team, it work great.  
 
 &nbsp;
 
@@ -110,13 +114,13 @@ if ui[-1].click():
 ```bash
 git clone https://github.com/rd4com/ui-terminal-mojo
 cd ui-terminal-mojo
-magic shell
-magic run build_pkg
+pixi shell
+pixi run build_pkg
 mojo run -I build examples/example_app.mojo
 ```
 Stay tuned, this is only the first development phase,  
 it should become a mojo community package (ecosystem) at time.  
-(to integrate easily into existing projects with: `magic add`)
+(to integrate easily into existing projects with: `pixi add`)
 
 There is an `__init__.mojo`,  
 so that in the meanwhile, in your new projects,  
@@ -127,8 +131,8 @@ from `ui-terminal-mojo` import *
 ```
 
 Please stay away from submodules,  
-and wait for the `magic add` solution,  
-because `magic` does the compatibility versions checks of dependencies.  
+and wait for the `pixi add` solution,  
+because `pixi` does the compatibility versions checks of dependencies.  
 (example: adding this to a project that uses an unsupported version mojo)  
 And so things composes with it.
 

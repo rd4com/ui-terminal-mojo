@@ -34,7 +34,7 @@ fn main():
         var idx=0
         if showtodos:
             for t in todos:
-                Text(String(idx,"   ",t[])) in ui
+                Text(String(idx,"   ",t)) in ui
                 if ui[-1].click():
                     input_todo = todos.pop(idx)
                 if ui[-1].hover():

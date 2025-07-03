@@ -8,8 +8,8 @@ from memory import UnsafePointer
 from utils import StaticTuple
 from .simdqueue import *
 
-@value
-struct term_type:
+@fieldwise_init
+struct term_type(Movable, Copyable):
     alias _generic_type = SIMD[
         (DType.uint32, DType.uint64)[
             Int(os_is_macos())
@@ -111,8 +111,8 @@ struct Keys:
 
 
 
-@value
-struct Events:
+@fieldwise_init
+struct Events(Movable, Copyable):
     var values: QueueSIMD[DType.uint8]
     fn __init__(out self):
         self.values = __type_of(self.values)()
@@ -164,8 +164,8 @@ fn get_term_size(out ret:SIMD[DType.int32, 2]):
     except e: ...
     return 0
 
-
-struct TimeCounter:
+@fieldwise_init
+struct TimeCounter(Movable, Copyable):
     alias nanos_in_one_sec:UInt = 1000000000
     var previous: UInt
     # var difference: UInt # for adjust waiting too long
@@ -180,8 +180,8 @@ struct TimeCounter:
         else:
             self.previous = current
 
-@value
-struct Fg:
+@fieldwise_init
+struct Fg(Movable, Copyable):
     alias default = Self(39)
     alias black = Self(30)
     alias red = Self(31)
@@ -196,8 +196,8 @@ struct Fg:
     fn to_bg(self)->Bg:
         return Bg(self.value+10)
 
-@value
-struct Bg:
+@fieldwise_init
+struct Bg(Movable, Copyable):
     alias default = Self(49)
     alias black = Self(40)
     alias red = Self(41)
@@ -212,8 +212,8 @@ struct Bg:
     fn to_fg(self)->Fg:
         return Fg(self.value-10)
 
-@value
-struct Text:
+@fieldwise_init
+struct Text(Movable, Copyable):
     var value: String
     var fg: UInt8
     var bg: UInt8
