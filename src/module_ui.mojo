@@ -1,4 +1,5 @@
 from .module_simple_backend import *
+from sys.intrinsics import _type_is_eq
 from time import sleep, monotonic
 from sys.param_env import env_get_bool
 from builtin._location import __call_location, _SourceLocation
@@ -269,6 +270,9 @@ struct Border[M_O:MutableOrigin]:
 
         __disable_del(self)
 
+    fn __unsafe_del(owned self):
+        __disable_del(self)
+
     # fn end_border[style:String=".",animate:Optional[Int]=None](owned self, mut ui:UI, fg: Fg):
     #     # var last_index = len(ui.zones)
     #     var tmp_measuring = ui.start_measuring()
@@ -342,7 +346,65 @@ struct StyleBorderDouble(StyledBorder):
     alias h = String("═")
     alias b_l = String("╚")
     alias b_r = String("╝")
+struct __StyleBorderNone(StyledBorder):
+    alias up_l = String("")
+    alias up_r = String("")
+    alias v = String("")
+    alias h = String("")
+    alias b_l = String("")
+    alias b_r = String("")
 
+struct MoveCursor[O:MutableOrigin=MutableOrigin.empty, border:StyledBorder = __StyleBorderNone, border_color: Fg= Fg.default]():
+    var ui: Pointer[UI, O]
+    var m: StartedMeasurment[O] #LinearType
+    var after: Bool
+    var storage_border: Border[O] #LinearType
+
+    @staticmethod
+    fn AfterThis[border:StyledBorder = __StyleBorderNone, border_color: Fg= Fg.default](
+        mut ui:UI, 
+        out ret: MoveCursor[__origin_of(ui), border, border_color]
+    ):
+        ret = __type_of(ret)(ui)
+        ret.after=True
+    
+    @staticmethod
+    fn BelowThis[border:StyledBorder = __StyleBorderNone, border_color: Fg= Fg.default](
+        mut ui:UI, 
+        out ret: MoveCursor[__origin_of(ui), border, border_color]
+    ):
+        ret = __type_of(ret)(ui)
+        ret.after=False
+    
+    fn __init__(out self, ref[O]ui:UI):
+        self.ui = Pointer(to=ui)
+        self.m = ui.start_measuring()
+        self.after = False
+        @parameter
+        if Self.__has_border[border]():
+            self.storage_border = Border[O](self.ui[])
+        else:
+            __mlir_op.`lit.ownership.mark_initialized`(__get_mvalue_as_litref(self.storage_border))
+    
+    @staticmethod
+    fn __has_border[b:StyledBorder]()->Bool:
+        return not _type_is_eq[b, __StyleBorderNone]()
+
+    fn __enter__(mut self): ...
+    fn __exit__(mut self): ...
+    
+    fn __del__(owned self):
+        @parameter
+        if Self.__has_border[border]():
+            self.storage_border^.end_border[border](self.ui[], border_color)
+        else:
+            self.storage_border^.__unsafe_del()
+        
+        var tmp = self.m^.stop_measuring()
+        if self.after:
+            tmp^.move_cursor_after()
+        else:
+            tmp^.move_cursor_below()
 
 # ┌────────────────────────────────────────────────────────────────────────────┐
 #      Not api: insertions of elements in the ui
