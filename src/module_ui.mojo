@@ -386,11 +386,25 @@ struct MoveCursor[O:MutableOrigin=MutableOrigin.empty, border:StyledBorder = __S
         else:
             __mlir_op.`lit.ownership.mark_initialized`(__get_mvalue_as_litref(self.storage_border))
     
+    fn __peek_dimensions(self, out ret: XY):
+        ret = self.m.peek_dimensions()
+        @parameter
+        if Self.__has_border[border]():
+            ret += XY(1, 1)
+    fn hover(self, out ret: Bool):
+        var dims = self.__peek_dimensions()
+        if self.m.start_len>=len(self.ui[].zones):
+            return False
+        var start_pos = self.ui[].zones[self.m.start_len].pos
+        return PositionAndDimensions(start_pos, dims).__contains__(
+            self.ui[].cursor
+        )
+    
     @staticmethod
     fn __has_border[b:StyledBorder]()->Bool:
         return not _type_is_eq[b, __StyleBorderNone]()
 
-    fn __enter__(mut self): ...
+    fn __enter__(mut self)->ref[__origin_of(self)]Self: return Pointer(to=self)[]
     fn __exit__(mut self): ...
     
     fn __del__(owned self):
