@@ -1,5 +1,6 @@
 from `ui-terminal-mojo` import *
 
+
 def main():
     var ui = UI()
     var App = String("MyApp")
@@ -17,14 +18,7 @@ def main():
             else:
                 Text(SIMD[DType.float16, 4](slider_value)) in ui
             "" in ui
-        widget_value_selector["DType:", theme=Fg.green](
-            ui,
-            selected_dtype,
-            List[DType](DType.uint8, DType.float16)
-        )
         widget_slider["Slide"](ui, slider_value)
-        widget_selection_group["Selection", theme=Fg.blue](
-            ui,
-            List[String]("One", "Two", "Three"),
-            selected
+        widget_selection_group["Selection", theme = Fg.blue](
+            ui, List[String](["One", "Two", "Three"]), selected
         )

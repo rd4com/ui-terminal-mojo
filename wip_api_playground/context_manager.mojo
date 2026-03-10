@@ -2,7 +2,7 @@ from `ui-terminal-mojo` import *
 
 def main():
     var ui = UI()
-    var entries = List[UInt8](0, 2, 5, 8)
+    var entries: List[UInt8] = [0, 2, 5, 8]
     for _ in ui:
 
         with MoveCursor.AfterThis(ui):

@@ -11,7 +11,7 @@ struct DirView(Movable&Copyable):
     var content: List[DirEntry]
     fn __init__(out self, p: Path):
         self.path = p
-        self.content = __type_of(self.content)()
+        self.content = type_of(self.content)()
         try: 
             var tmp = p.listdir()
             for e in tmp:
@@ -38,13 +38,13 @@ struct DirEntry(Movable&Copyable):
 
 def main():
     var ui = UI()
-    var start_dir = List(DirView(cwd()))
+    var start_dir = [DirView(cwd())]
 
-    var size_values = List[String]("None", "B", "Kb", "Mb")
+    var size_values: List[String] = ["None", "B", "Kb", "Mb"]
     var size_selected = 0
     var show_perm = False
 
-    var sort_values = List[String]("Access time", "Modification time", "Creation time", "Size")
+    var sort_values: List[String] = ["Access time", "Modification time", "Creation time", "Size"]
     var sort_selected = 0
     @parameter
     fn f_sort(a:DirEntry, b:DirEntry)->Bool:
@@ -63,7 +63,7 @@ def main():
             var res = d.refresh()
             if res == False:
                 try:
-                    start_dir = List(DirView(cwd()))
+                    start_dir = [DirView(cwd())]
                 except e:
                     ...
                 break
@@ -73,7 +73,7 @@ def main():
 
     var error = String("")
     var not_error = String("")
-    var colors = List(Fg.blue,Fg.cyan, Fg.green, Fg.magenta, Fg.red)
+    var colors = [Fg.blue,Fg.cyan, Fg.green, Fg.magenta, Fg.red]
     for _ in ui:
 
         Text(error)|Bg.red in ui
@@ -116,7 +116,7 @@ def main():
                         else:
                             while idx != len(start_dir):
                                 _=start_dir.pop()
-                        start_dir.append(tmp_elem)
+                        start_dir.append(tmp_elem^)
                         need_refresh = True
                         break
                     except e:
@@ -140,7 +140,7 @@ def main():
             if peek.reduce_add() != 0:
                 tmp_measure^.stop_measuring().move_cursor_after()
             else:
-                __disable_del tmp_measure^.stop_measuring()
+                tmp_measure^.stop_measuring().__unsafe_del()
             if show_perm:
                 for e in dir.content:
                     Text(" ",oct(e.stats.st_mode)[-3:]) in ui

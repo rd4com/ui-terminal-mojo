@@ -11,4 +11,4 @@ license-file = "LICENSE"
 build_pkg = { cmd = ["mojo", "package", ".", "-o", "build/ui-terminal-mojo.mojopkg"] }
 
 [dependencies]
-modular = ">=25.5.0.dev2025070207,<=25.5.0.dev2025070207"
+modular = ">=26.2.0.dev2026012305,<=26.2.0.dev2026012305"

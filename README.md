@@ -4,7 +4,7 @@
  ╰══════┼═════─═══╝  
 ```
 
-🟢 Upgraded for `25.5.0.dev2025070207`  
+🟢 Upgraded for `26.2.0.dev2026012305`  
 🆕 Checkout this more advanced example: [File explorer](./examples/example_file_explorer.mojo)  
 
 <img src="./_output.gif" />  

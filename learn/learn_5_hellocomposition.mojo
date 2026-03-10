@@ -1,38 +1,41 @@
 from `ui-terminal-mojo` import *
 
+
 @fieldwise_init
-struct User(Copyable, Movable):
+struct User(Copyable, ImplicitlyCopyable, Movable):
     var name: String
     var city: String
+
 
 def main():
     var ui = UI()
     ui.feature_tab_menu = True
 
-    var users = List(
-        User("Peter", "Texas"),
-        User("Maria", "Paris")
-    )
+    var users = [User("Peter", "Texas"), User("Maria", "Paris")]
     var new_users = List[User]()
-    var current_list = Pointer[List[User], __origin_of(users,new_users)](to=users)
+    var current_list = Pointer[List[User], origin_of(users, new_users)](
+        to=users
+    )
     var user_adder = UserAdder(ui)
 
     for frame in ui:
+
         @parameter
         fn tab_menu():
             Text("Select user list") | Bg.blue in ui
             "New users" in ui
             if ui[-1].click():
-                current_list = __type_of(current_list)(to=new_users)
-            tag(ui,Bg.magenta, len(new_users))
+                current_list = type_of(current_list)(to=new_users)
+            tag(ui, Bg.magenta, len(new_users))
             "Users" in ui
             if ui[-1].click():
-                current_list =  __type_of(current_list)(to=users)
-            tag(ui,Bg.magenta, len(users))
-            Text("Merge new users")| Bg.green in ui
+                current_list = type_of(current_list)(to=users)
+            tag(ui, Bg.magenta, len(users))
+            Text("Merge new users") | Bg.green in ui
             if ui[-1].click():
-                users.extend(new_users)
+                users.extend(new_users.copy())
                 new_users.clear()
+
         ui.set_tab_menu[tab_menu]()
 
         Text("Users page") | Bg.blue in ui
@@ -40,6 +43,7 @@ def main():
         show_users(ui, current_list[])
         start_measuring^.stop_measuring().move_cursor_after()
         user_adder.render(current_list[])
+
 
 fn show_users(mut ui: UI, users: List[User]):
     "Function to show users."
@@ -54,22 +58,29 @@ fn show_users(mut ui: UI, users: List[User]):
     b^.end_border(ui, Fg.blue)
     measuring^.stop_measuring().move_cursor_below()
 
+
 @fieldwise_init
-struct UserAdder[O:MutableOrigin](Movable, Copyable):
+struct UserAdder[O: MutOrigin](Copyable, Movable):
     var input_name: String
     var input_city: String
     var input_name_is_edited: Bool
     var input_city_is_edited: Bool
-    var ui: Pointer[UI, O]
-    fn __init__(out self, ref[O]ui: UI):
+    var ui: Pointer[UI, Self.O]
+
+    fn __init__(out self, ref [Self.O]ui: UI):
         self.input_name = "Bob"
         self.input_city = "Barcelona"
         self.input_name_is_edited = False
         self.input_city_is_edited = True
         self.ui = Pointer(to=ui)
+
     fn render(mut self, mut users: List[User]):
-        input_buffer["Name:"](self.ui[], self.input_name, self.input_name_is_edited)
-        input_buffer["City:"](self.ui[], self.input_city, self.input_city_is_edited)
+        input_buffer["Name:"](
+            self.ui[], self.input_name, self.input_name_is_edited
+        )
+        input_buffer["City:"](
+            self.ui[], self.input_city, self.input_city_is_edited
+        )
         Text("Add person") | Bg.magenta in self.ui[]
         if self.ui[][-1].click():
             users.append(User(self.input_name, self.input_city))
