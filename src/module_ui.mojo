@@ -68,17 +68,19 @@ fn help_overlay(mut ui: UI):
 # ╚══════════╝
 fn center[width: Int](mut ui: UI):
     var element = Pointer(to=ui[-1])
-    element[].data.value = element[].data.value.center(width, " ")
+    element[].data.value = element[].data.value.ascii_center(
+        width, " "
+    )  # center(width, " ")
 
 
 fn ljust[width: Int](mut ui: UI):
     var element = Pointer(to=ui[-1])
-    element[].data.value = element[].data.value.ljust(width, " ")
+    element[].data.value = element[].data.value.ascii_ljust(width, " ")
 
 
 fn rjust[width: Int](mut ui: UI):
     var element = Pointer(to=ui[-1])
-    element[].data.value = element[].data.value.rjust(width, " ")
+    element[].data.value = element[].data.value.ascii_rjust(width, " ")
 
 
 # ╔════════════════════════════════════════════════════════════════════════════╗
@@ -134,7 +136,7 @@ struct StartedMeasurment[O: MutOrigin]:
     # the len of ui.zones when started measuring
     var ui_ptr: Pointer[UI, Self.O]
 
-    fn __init__(out self, ref [Self.O]ui: UI):
+    fn __init__(out self, ref[Self.O] ui: UI):
         self.start_len = len(ui.zones)
         self.ui_ptr = Pointer(to=ui)
 
@@ -437,7 +439,7 @@ struct MoveCursor[
         ret = type_of(ret)(ui)
         ret.after = False
 
-    fn __init__(out self, ref [Self.O]ui: UI):
+    fn __init__(out self, ref[Self.O] ui: UI):
         self.ui = Pointer(to=ui)
         self.m = ui.start_measuring()
         self.after = False
@@ -470,7 +472,7 @@ struct MoveCursor[
     fn __has_border[b: StyledBorder]() -> Bool:
         return not _type_is_eq[b, __StyleBorderNone]()
 
-    fn __enter__(mut self) -> ref [origin_of(self)] Self:
+    fn __enter__(mut self) -> ref[origin_of(self)] Self:
         return Pointer(to=self)[]
 
     fn __exit__(mut self):
@@ -479,8 +481,10 @@ struct MoveCursor[
     fn __del__(deinit self):
         @parameter
         if Self.__has_border[Self.border]():
+            var tmp_p = UnsafePointer(to=self.ui[]).as_any_origin()
             self.storage_border^.end_border[Self.border](
-                self.ui[], Self.border_color
+                # self.ui[], Self.border_color
+                tmp_p[], Self.border_color
             )
         else:
             self.storage_border^.__unsafe_del()
@@ -582,7 +586,7 @@ struct UI:
         ]()
         self.term = term_type()
         self.term.get_attr()
-        var tmp_ = self.term
+        var tmp_ = self.term.copy()
         tmp_.to_raw()
 
         self.time_counter = TimeCounter()
@@ -642,7 +646,7 @@ struct UI:
     fn __iter__(mut self) -> FrameIterator[origin_of(self)]:
         return FrameIterator(self)
 
-    fn start_measuring(mut self) -> StartedMeasurment[origin_of(self)]:
+    fn start_measuring[O:MutOrigin](ref[O] self) -> StartedMeasurment[O]:
         return StartedMeasurment(self)
 
     @always_inline
@@ -665,7 +669,7 @@ struct UI:
         # Design talk with Owen, for an additional different way to do things
         arg in self
 
-    fn __getitem__(mut self, pos: Int = -1) -> ref [origin_of(self.zones)] Zone:
+    fn __getitem__(mut self, pos: Int = -1) -> ref[origin_of(self.zones)] Zone:
         if pos < 0:
             var idx = len(self.zones) + pos
             if idx >= 0:
@@ -679,7 +683,7 @@ struct UI:
         Text(String()) in self
         return self.zones[len(self.zones) - 1]
 
-    fn set_tab_menu[f: fn () capturing -> None](mut self):
+    fn set_tab_menu[f: fn() capturing -> None](mut self):
         if self.show_tab_menu:
             var tmp = self.scroll
             self.scroll = 0
@@ -879,7 +883,7 @@ struct FrameIterator[O: MutOrigin](Copyable, Movable):
     var ui_ptr: Pointer[UI, Self.O]
     var last_iteration: Bool
 
-    fn __init__(out self, ref [Self.O]ui: UI):
+    fn __init__(out self, ref[Self.O] ui: UI):
         self.ui_ptr = Pointer(to=ui)
         self.last_iteration = False
 
@@ -937,7 +941,7 @@ fn input_buffer[
 @always_inline
 fn widget_paginate_list[
     W: Writable,
-    T: Representable & Copyable & Movable,
+    T: Writable & Copyable & Movable,
     //,
     label: W,
     elements_per_page: Int = 4,
@@ -972,7 +976,7 @@ fn widget_paginate_list[
 
 @always_inline
 fn widget_collapsible_menu[
-    T: Representable & Copyable & Movable, //, label: String = "Menu"
+    T: Writable & Copyable & Movable, //, label: String = "Menu"
 ](
     mut ui: UI,
     elements: List[T],
@@ -1033,7 +1037,7 @@ fn widget_slider[
 
 
 fn widget_value_selector[
-    T: Copyable & Movable & Representable,
+    T: Copyable & Movable & Writable,
     //,
     label: String,
     theme: Fg = Fg.yellow,
@@ -1069,7 +1073,7 @@ fn widget_value_selector[
 
 
 fn widget_selection_group[
-    T: Copyable & Movable & Representable,
+    T: Copyable & Movable & Writable,
     //,
     label: String,
     theme: Fg = Fg.yellow,
@@ -1423,7 +1427,7 @@ fn shake[speed: Int = 8](mut ui: UI):
 # ║ Ticker ║
 # ╚════════╝
 fn widget_ticker[
-    R: Representable & Movable & Copyable, //, speed: Int = 9
+    R: Writable & Movable & Copyable, //, speed: Int = 9
 ](mut ui: UI, inputs: List[R]):
     constrained[speed >= 8, "speed >= 8"]()
     var current_time2 = monotonic() // (10**9)
@@ -1448,7 +1452,7 @@ fn spinner2[width: Int = 16, style: String = ".", speed: Int = 1](mut ui: UI):
     constrained[speed <= 4, "Spinner2 speed >4"]()
     constrained[len(style) == 1, "len(style)!=1"]()
     var pos = ((monotonic() * speed * width) // (10 ** (9))) % width
-    var res = (style * Int(pos)).center(width, " ")
+    var res = (style * Int(pos)).ascii_center(width, " ")
     Text(res) in ui
 
 
@@ -1461,9 +1465,9 @@ fn animate_simple_inline(mut ui: UI):
 fn animate_time[
     theme: Fg = Fg.default
 ](mut ui: UI,):
-    var values = InlineArray[String, 12](
+    var values: InlineArray[String, 12] = [
         "🕐", "🕑", "🕒", "🕓", "🕔", "🕕", "🕖", "🕗", "🕘", "🕙", "🕚", "🕛"
-    )
+    ]
     Text(" ") | theme in ui
     ui[-1].data.replace_each_when_render = values[
         (((ui.time_counter.previous * 12) // 1000000000)) % 12

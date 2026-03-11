@@ -1,7 +1,7 @@
 from time import sleep
 from time import perf_counter_ns
-from sys import external_call
-from sys.ffi import c_short, c_int, c_uint, c_char, c_long
+from ffi import external_call
+from ffi import c_short, c_int, c_uint, c_char, c_long
 from sys.info import CompilationTarget
 from sys import size_of
 from memory import UnsafePointer
